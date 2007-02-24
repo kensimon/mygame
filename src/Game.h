@@ -6,9 +6,7 @@
 class Game
 {
     public:
-        Game();
-        ~Game();
-        static Game *getInstance();
+        static Game* getInstance();
         int init(int, char**);
 
     private:
@@ -19,6 +17,10 @@ class Game
         static void specialFunc(int, int, int);
         static void timerFunc(int);
         static void dragMouse(int, int);
-        static Game *instance;
+        static Game* instance;
+
+    protected:
+        Game();
+        virtual ~Game();
 };
 #endif

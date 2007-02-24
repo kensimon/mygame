@@ -5,8 +5,8 @@
 #include <iostream>
 
 static int framewait = 16;
-Game *Game::instance = 0;
 ItemCollection *ic = new ItemCollection();
+Game* Game::instance = 0;
 int curbutton;
 
 Game::Game()
@@ -17,19 +17,20 @@ Game::~Game()
 {
 };
 
-Game *Game::getInstance()
+Game* Game::getInstance()
 {
+    if (instance == 0)
+        instance = new Game();
     return instance;
 }
 
 int Game::init(int argc, char **argv)
 {
-    Game instance;
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(500, 500);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("spin!");
+    glutCreateWindow("mygame");
     glClearColor(0.0, 0.0, 0.8, 0.0);
     glShadeModel(GL_FLAT);
     glutDisplayFunc(Game::display);
