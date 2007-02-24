@@ -1,0 +1,12 @@
+mygame (0.0.2-2) unstable; urgency=low
+
+  * Testing dch -i
+
+ -- Kenneth E. Simon <ken@ninkendo.org>  Sun, 23 Oct 2005 20:43:43 -0400
+
+mygame (0.0.2-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Kenneth E. Simon <ken@ninkendo.org>  Sat, 22 Oct 2005 16:12:17 -0400
+

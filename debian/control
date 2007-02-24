@@ -1,0 +1,12 @@
+Source: mygame
+Section: misc
+Priority: optional
+Maintainer: Kenneth E. Simon <ken@ninkendo.org>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, freeglut3-dev
+Standards-Version: 3.6.1
+
+Package: mygame
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: some stupid OpenGL game I made
+ mygame is a stupid OpenGL game Ken Simon made.
