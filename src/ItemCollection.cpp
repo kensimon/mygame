@@ -2,6 +2,9 @@
 #include "Square.h"
 #include <iostream>
 
+/*
+ * ItemCollection is a double-linked list of Item objects.
+ */
 ItemCollection::ItemCollection()
 {
     head = new Item();
@@ -9,6 +12,7 @@ ItemCollection::ItemCollection()
     head->next = NULL;
     head->previous = NULL;
     tail = head;
+    _length = 0;
 }
 
 
@@ -28,7 +32,48 @@ void ItemCollection::push(Item* n)
     cur->next = n;
     n->previous = cur;
     tail = n;
+    _length++;
 }
+
+Item* ItemCollection::get(int num)
+{
+    Item* cur = head->next;
+    int i = 0;
+
+    while (cur != NULL)
+    {
+        if (i == num)
+            return cur;
+        i++;
+        cur = cur->next;
+    }
+
+    return NULL;
+}
+
+#if 0
+Item** ItemCollection::toArray()
+{
+    Item** a = new Item*[_length];
+    Item* cur = head->next;
+    int i = 0;
+    while (cur != NULL && i < _length)
+    {
+        a[i] = cur;
+        cur = cur->next;
+        i++;
+    }
+
+    //fill in the rest with NULL's, in case for some reason a node was
+    //removed while we were crawling through it.
+    while (i < _length)
+    {
+        a[i] = NULL;
+    }
+
+    return a;
+}
+#endif
 
 void ItemCollection::removeItem(Item* i)
 {
@@ -38,7 +83,6 @@ void ItemCollection::removeItem(Item* i)
     {
         if (cur == i)
         {
-            std::cout << "found an item matching i\n";
             if (cur->previous != NULL)
             {
                 cur->previous->next = cur->next;
@@ -48,11 +92,42 @@ void ItemCollection::removeItem(Item* i)
                 if (cur == tail)
                     tail = cur->previous;
 
+                delete cur;
+                _length--;
                 return;
             }
             //else they're trying to delete head, which we won't allow.
         }
         cur = cur->next;
+    }
+}
+
+void ItemCollection::removeItem(int num)
+{
+    Item* cur = head->next;
+    int i = 0;
+
+    while (cur != NULL)
+    {
+        if (i == num)
+        {
+            if (cur->previous != NULL)
+            {
+                cur->previous->next = cur->next;
+                if (cur->next != NULL)
+                    cur->next->previous = cur->previous;
+
+                if (cur == tail)
+                    tail = cur->previous;
+
+                delete cur;
+                _length--;
+                return;
+            }
+            //else they're trying to delete head, which we won't allow.
+        }
+        cur = cur->next;
+        i++;
     }
 }
 
@@ -63,6 +138,7 @@ void ItemCollection::pop()
         tail = tail->previous;
         delete tail->next;
         tail->next = NULL;
+        _length++;
     }
 }
 
@@ -142,4 +218,9 @@ void ItemCollection::select(GLdouble x, GLdouble y)
 Item* ItemCollection::getSelected()
 {
     return selected;
+}
+
+int ItemCollection::length()
+{
+    return _length;
 }

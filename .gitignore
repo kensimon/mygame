@@ -11,9 +11,11 @@ src/ItemCollection.o
 src/Item.o
 src/Square.o
 src/Circle.o
+src/Physics.o
 src/Main.o
 src/mygame
 config.log
 config.status
 Makefile
 debian/mygame
+autom4te.cache/

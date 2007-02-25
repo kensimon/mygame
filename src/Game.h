@@ -2,6 +2,8 @@
 #define __GAME_H
 #include <GL/glut.h>
 #include <iostream>
+#include "ItemCollection.h"
+#include "Physics.h"
 
 class Game
 {
@@ -18,6 +20,10 @@ class Game
         static void timerFunc(int);
         static void dragMouse(int, int);
         static Game* instance;
+        int curbutton;
+        int framewait;
+        ItemCollection* ic;
+        Physics* phys;
 
     protected:
         Game();

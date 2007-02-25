@@ -4,13 +4,16 @@
 #include "ItemCollection.h"
 #include <iostream>
 
-static int framewait = 16;
-ItemCollection *ic = new ItemCollection();
-Game* Game::instance = 0;
-int curbutton;
+Game* Game::instance = NULL;
+//int Game::framewait = 16;
+//int Game::curbutton = 0;
 
 Game::Game()
 {
+    ic = new ItemCollection();
+    phys = new Physics(ic);
+    framewait = 16;
+    curbutton = 0;
 };
 
 Game::~Game()
@@ -19,7 +22,7 @@ Game::~Game()
 
 Game* Game::getInstance()
 {
-    if (instance == 0)
+    if (instance == NULL)
         instance = new Game();
     return instance;
 }
@@ -38,7 +41,7 @@ int Game::init(int argc, char **argv)
     glutMouseFunc(Game::mouse);
     glutKeyboardFunc(Game::keyboardFunc);
     glutSpecialFunc(Game::specialFunc);
-    glutTimerFunc(framewait, Game::timerFunc, 0);
+    glutTimerFunc(Game::framewait, Game::timerFunc, 0);
     glutMotionFunc(Game::dragMouse);
     glutMainLoop();
     return 0;
@@ -47,13 +50,14 @@ int Game::init(int argc, char **argv)
 void Game::timerFunc(int)
 {
     Game::display();
-    glutTimerFunc(framewait, Game::timerFunc, 0);
+    instance->phys->tick();
+    glutTimerFunc(instance->framewait, Game::timerFunc, 0);
 }
 
 void Game::display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    ic->drawAll();
+    instance->ic->drawAll();
     glutSwapBuffers();
 }
 
@@ -75,14 +79,47 @@ void Game::keyboardFunc(unsigned char key, int, int)
             exit(0);
             break;
         case 'c':
-            printf("x: %f, y: %f\n", ic->getSelected()->getx(), ic->getSelected()->gety());
-            printf("spin: %f\n\n", ic->getSelected()->getSpin());
+            printf("x: %f, y: %f\n", instance->ic->getSelected()->getx(), instance->ic->getSelected()->gety());
+            printf("spin: %f\n\n", instance->ic->getSelected()->getSpin());
             break;
         case 'd':
-            ic->removeItem(ic->getSelected());
+            instance->ic->removeItem(instance->ic->getSelected());
             break;
         case 'p':
-            ic->pop();
+            instance->ic->pop();
+            break;
+        case 'l':
+            instance->ic->removeItem(instance->ic->length() - 1);
+            break;
+        case '0':
+            instance->ic->removeItem(0);
+            break;
+        case '1':
+            instance->ic->removeItem(1);
+            break;
+        case '2':
+            instance->ic->removeItem(2);
+            break;
+        case '3':
+            instance->ic->removeItem(3);
+            break;
+        case '4':
+            instance->ic->removeItem(4);
+            break;
+        case '5':
+            instance->ic->removeItem(5);
+            break;
+        case '6':
+            instance->ic->removeItem(6);
+            break;
+        case '7':
+            instance->ic->removeItem(7);
+            break;
+        case '8':
+            instance->ic->removeItem(8);
+            break;
+        case '9':
+            instance->ic->removeItem(9);
             break;
         default:
             break;
@@ -94,16 +131,16 @@ void Game::specialFunc(int key, int x, int y)
     switch(key)
     {
         case GLUT_KEY_UP:
-            ic->getSelected()->resize(1);
+            instance->ic->getSelected()->resize(1);
             break;
         case GLUT_KEY_DOWN:
-            ic->getSelected()->resize(-1);
+            instance->ic->getSelected()->resize(-1);
             break;
         case GLUT_KEY_LEFT:
-            ic->getSelected()->spinMomentum += 1;
+            instance->ic->getSelected()->spinMomentum += 1;
             break;
         case GLUT_KEY_RIGHT:
-            ic->getSelected()->spinMomentum -= 1;
+            instance->ic->getSelected()->spinMomentum -= 1;
             break;
         default:
             break;
@@ -112,25 +149,25 @@ void Game::specialFunc(int key, int x, int y)
 
 void Game::mouse(int button, int state, int x, int y)
 {
-    curbutton = button;
-    switch (curbutton) {
+    instance->curbutton = button;
+    switch (instance->curbutton) {
         case GLUT_LEFT_BUTTON:
             if (state == GLUT_DOWN)
             {
-                ic->select((GLdouble)x, (GLdouble)y);
+                instance->ic->select((GLdouble)x, (GLdouble)y);
             }
             break;
         case GLUT_RIGHT_BUTTON:
             if (state == GLUT_DOWN)
             {
-                //ic->getSelected()->moveTo(x, y);
-                ic->push(new Circle(x, y, 10));
+                //instance->ic->getSelected()->moveTo(x, y);
+                instance->ic->push(new Circle(x, y, 10));
             }
             break;
         case GLUT_MIDDLE_BUTTON:
             if (state == GLUT_DOWN)
             {
-                ic->push(new Square(x, y, 10));
+                instance->ic->push(new Square(x, y, 10));
             }
         default:
             break;
@@ -139,7 +176,7 @@ void Game::mouse(int button, int state, int x, int y)
 
 void Game::dragMouse(int x, int y)
 {
-    if (curbutton == GLUT_LEFT_BUTTON)
-        ic->getSelected()->moveTo(x, y);
+    if (instance->curbutton == GLUT_LEFT_BUTTON)
+        instance->ic->getSelected()->moveTo(x, y);
 
 }

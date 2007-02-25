@@ -44,7 +44,7 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_mygame_OBJECTS = Game.$(OBJEXT) ItemCollection.$(OBJEXT) \
 	Item.$(OBJEXT) Square.$(OBJEXT) Circle.$(OBJEXT) \
-	Main.$(OBJEXT)
+	Physics.$(OBJEXT) Main.$(OBJEXT)
 mygame_OBJECTS = $(am_mygame_OBJECTS)
 mygame_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -155,6 +155,7 @@ mygame_SOURCES = \
 		 Item.h Item.cpp \
 		 Square.h Square.cpp \
 		 Circle.h Circle.cpp \
+		 Physics.h Physics.cpp \
 		 Main.cpp
 
 all: all-am
@@ -228,6 +229,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ItemCollection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Physics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Square.Po@am__quote@
 
 .cpp.o:
