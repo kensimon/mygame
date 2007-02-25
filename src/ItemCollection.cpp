@@ -30,6 +30,32 @@ void ItemCollection::push(Item* n)
     tail = n;
 }
 
+void ItemCollection::removeItem(Item* i)
+{
+    Item* cur = head;
+
+    while (cur != NULL)
+    {
+        if (cur == i)
+        {
+            std::cout << "found an item matching i\n";
+            if (cur->previous != NULL)
+            {
+                cur->previous->next = cur->next;
+                if (cur->next != NULL)
+                    cur->next->previous = cur->previous;
+
+                if (cur == tail)
+                    tail = cur->previous;
+
+                return;
+            }
+            //else they're trying to delete head, which we won't allow.
+        }
+        cur = cur->next;
+    }
+}
+
 void ItemCollection::pop()
 {
     if (tail->previous != NULL)

@@ -12,6 +12,7 @@ public:
 		void pop();
 		void drawAll();
 		void select(GLdouble x, GLdouble y);
+		void removeItem(Item* i);
 		Item* getSelected();
 
 private:

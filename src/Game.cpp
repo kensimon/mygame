@@ -74,11 +74,14 @@ void Game::keyboardFunc(unsigned char key, int, int)
         case 'q':
             exit(0);
             break;
-        case 'p':
+        case 'c':
             printf("x: %f, y: %f\n", ic->getSelected()->getx(), ic->getSelected()->gety());
             printf("spin: %f\n\n", ic->getSelected()->getSpin());
             break;
         case 'd':
+            ic->removeItem(ic->getSelected());
+            break;
+        case 'p':
             ic->pop();
             break;
         default:
