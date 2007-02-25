@@ -152,7 +152,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = src
-EXTRA_DIST = debian .bzr .bzrignore .git .gitignore
+EXTRA_DIST = debian
 all: all-recursive
 
 .SUFFIXES:

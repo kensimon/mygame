@@ -1,4 +1,4 @@
-AC_INIT(mygame, 0.0.2, ken@ninkendo.org)
+AC_INIT(mygame, 0.0.3, ken@ninkendo.org)
 AM_INIT_AUTOMAKE($PACKAGE_TARNAME, $PACKAGE_VERSION)
 
 AC_PROG_CXX
