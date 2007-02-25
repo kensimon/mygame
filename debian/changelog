@@ -1,3 +1,9 @@
+mygame (0.0.3-1) feisty; urgency=low
+
+  * Version bump
+
+ -- Ken Simon <ken@cucumber>  Sun, 25 Feb 2007 01:40:12 -0500
+
 mygame (0.0.2-2) unstable; urgency=low
 
   * Testing dch -i
