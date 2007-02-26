@@ -19,6 +19,11 @@ Item::Item()
     //They should get moved the first time they're drawn.
     objx = 0;
     objy = 0;
+
+    mass = 1;
+
+    xclickpos = 0;
+    yclickpos = 0;
 }
 
 Item::~Item()
@@ -34,10 +39,24 @@ void Item::moveTo(GLfloat a, GLfloat b)
     //printf("I moved to %lf, %lf\n", x, y);
 }
 
+void Item::dragTo(GLdouble a, GLdouble b)
+{
+    x += a - xclickpos;
+    y += b - yclickpos;
+
+    xclickpos = a;
+    yclickpos = b;
+}
+
 void Item::resize (GLfloat x)
 {
     //printf("Resizing to %lf\n", x);
     size += x;
+}
+
+void Item::setMass(GLfloat newMass)
+{
+    mass = newMass;
 }
 
 GLdouble Item::getx()
@@ -60,6 +79,8 @@ void Item::rotate()
     spin += spinMomentum;
     if (spin > 360.0)
         spin -= 360.0;
+    else if (spin < -360.0)
+        spin += 360.0;
     //glutPostRedisplay();
 }
 
@@ -98,4 +119,15 @@ GLdouble Item::getobjx()
 GLdouble Item::getobjy()
 {
     return objy;
+}
+
+GLfloat Item::getMass()
+{
+    return mass;
+}
+
+void Item::setClickPos(GLdouble x, GLdouble y)
+{
+    xclickpos = x;
+    yclickpos = y;
 }

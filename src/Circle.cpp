@@ -33,6 +33,7 @@ void Circle::draw()
     GLdouble projMatrix[16];
     GLint viewport[4];
     glPushMatrix();
+    glLoadIdentity();
 
     glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
     glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);

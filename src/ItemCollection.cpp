@@ -193,14 +193,17 @@ void ItemCollection::select(GLdouble x, GLdouble y)
     /* If we haven't found one yet... */
     if (cur == NULL)
     {
-        /* Select the last item of the list. */
+        /* Select nothing. */
         selected->setColor(1,1,1);
-        selected = tail;
-        cur = tail;
+        selected = head;
+        cur = head;
     }
 
-    /* Now we set the selected one as the topmost one. */
-    if (cur->next != NULL)
+    /* 
+     * Now we set the selected one as the topmost one,
+     * so long as it's not head.
+     */
+    if (cur->next != NULL && cur != head)
     {
         Item *tmp = cur;
         if (tmp->previous != NULL)
@@ -212,7 +215,8 @@ void ItemCollection::select(GLdouble x, GLdouble y)
         tail = tmp;
     }
 
-    selected->setColor( .8, 0, 0);
+    if (selected != head)
+        selected->setColor( .8, 0, 0);
 }
 
 Item* ItemCollection::getSelected()

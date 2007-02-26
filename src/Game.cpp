@@ -51,6 +51,9 @@ void Game::timerFunc(int)
 {
     Game::display();
     instance->phys->tick();
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR)
+        printf ("%s\n", error);
     glutTimerFunc(instance->framewait, Game::timerFunc, 0);
 }
 
@@ -155,6 +158,7 @@ void Game::mouse(int button, int state, int x, int y)
             if (state == GLUT_DOWN)
             {
                 instance->ic->select((GLdouble)x, (GLdouble)y);
+                instance->ic->getSelected()->setClickPos((GLdouble)x, (GLdouble)y);
             }
             break;
         case GLUT_RIGHT_BUTTON:
@@ -176,7 +180,8 @@ void Game::mouse(int button, int state, int x, int y)
 
 void Game::dragMouse(int x, int y)
 {
-    if (instance->curbutton == GLUT_LEFT_BUTTON)
-        instance->ic->getSelected()->moveTo(x, y);
-
+        if (instance->curbutton == GLUT_LEFT_BUTTON)
+        {
+            instance->ic->getSelected()->dragTo(x, y);
+        }
 }

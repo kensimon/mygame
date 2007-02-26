@@ -10,6 +10,7 @@ class Item
         ~Item();
         void moveTo(GLfloat, GLfloat);
         void resize(GLfloat x);
+        void setMass(GLfloat newMass);
         GLdouble getx();
         GLdouble gety();
         GLdouble getobjx();
@@ -24,6 +25,9 @@ class Item
         int spinMomentum;
         GLfloat getMomentumX();
         GLfloat getMomentumY();
+        GLfloat getMass();
+        void setClickPos(GLdouble, GLdouble);
+        void dragTo(GLdouble, GLdouble);
 
     protected:
         GLdouble x;
@@ -37,6 +41,9 @@ class Item
         GLfloat size;
         GLfloat momentumX;
         GLfloat momentumY;
+        GLfloat mass;
+        GLdouble xclickpos;
+        GLdouble yclickpos;
 
 };
 #endif

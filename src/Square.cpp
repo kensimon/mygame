@@ -33,6 +33,7 @@ void Square::draw()
     GLint viewport[4];
 
     glPushMatrix();
+    glLoadIdentity();
 
     /* OpenGL is fucking retarded.  Why does everything return void? 
      * I'd love to call GLdouble modelMatrix[16] = glGetDoublev(GL_MODELVIEW_MATRIX),
