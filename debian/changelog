@@ -1,3 +1,9 @@
+mygame (0.0.3-2) feisty; urgency=low
+
+  * Sync with git
+
+ -- Ken Simon <ksimon@autoweb.net>  Tue, 27 Feb 2007 16:48:13 -0500
+
 mygame (0.0.3-1) feisty; urgency=low
 
   * Version bump
