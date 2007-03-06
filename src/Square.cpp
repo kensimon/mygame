@@ -61,9 +61,12 @@ void Square::drawBBox()
     GLint viewport[4];
 
     GLdouble csize = sqrt((size * size) + (size * size));
-    GLdouble theta = (((int)spin % 90) * (2.0 * PI)) / 360.0; //theta is spin in radians
-    GLdouble w = csize * cos(theta);
-    GLdouble h = csize * sin(theta);
+    GLdouble theta = ((((int)spin % 90) + 45) * (2.0 * PI)) / 360.0; //theta is spin in radians
+    GLdouble w, h;
+    w = csize * cos(theta);
+    h = csize * sin(theta);
+
+    w = h = max(w,h);
 
     glPushMatrix();
     glLoadIdentity();
