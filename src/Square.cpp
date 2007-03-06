@@ -27,6 +27,7 @@ Square::~Square()
 
 void Square::draw()
 {
+    drawBBox();
     GLdouble objz = 0;
     GLdouble modelMatrix[16];
     GLdouble projMatrix[16];
@@ -35,15 +36,10 @@ void Square::draw()
     glPushMatrix();
     glLoadIdentity();
 
-    /* OpenGL is fucking retarded.  Why does everything return void? 
-     * I'd love to call GLdouble modelMatrix[16] = glGetDoublev(GL_MODELVIEW_MATRIX),
-     * but it insists on making me type extra lines.
-     */
     glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
     glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    /* All that for this line. */
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
 
     /* Move the square to where it belongs */
@@ -55,4 +51,33 @@ void Square::draw()
     glRectf(size*.9, -(size*.9), -(size*.9), size*.9);
     glPopMatrix();
     //glutPostRedisplay();
+} 
+
+void Square::drawBBox()
+{
+    GLdouble objz = 0;
+    GLdouble modelMatrix[16];
+    GLdouble projMatrix[16];
+    GLint viewport[4];
+
+    GLdouble csize = sqrt((size * size) + (size * size));
+    GLdouble theta = (((int)spin % 90) * (2.0 * PI)) / 360.0; //theta is spin in radians
+    GLdouble w = csize * cos(theta);
+    GLdouble h = csize * sin(theta);
+
+    glPushMatrix();
+    glLoadIdentity();
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
+
+    /* Move the square to where it belongs */
+    glTranslatef(objx, -objy, objz);
+    glColor3f(red * 0.5, green * 0.5, blue * 0.5);
+    glRectf(w, h, -w, -h);
+    //glRectf(10,-10, -10, 10);
+    glPopMatrix();
 } 

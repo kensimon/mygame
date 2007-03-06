@@ -24,6 +24,8 @@ Item::Item()
 
     xclickpos = 0;
     yclickpos = 0;
+
+    bbox = new BBox(0, 0, 0, 0);
 }
 
 Item::~Item()
@@ -36,6 +38,7 @@ void Item::moveTo(GLfloat a, GLfloat b)
     momentumY = (b - y);
     x = a;
     y = b;
+    this->updateBBox();
     //printf("I moved to %lf, %lf\n", x, y);
 }
 
@@ -46,12 +49,14 @@ void Item::dragTo(GLdouble a, GLdouble b)
 
     xclickpos = a;
     yclickpos = b;
+    this->updateBBox();
 }
 
 void Item::resize (GLfloat x)
 {
     //printf("Resizing to %lf\n", x);
     size += x;
+    this->updateBBox();
 }
 
 void Item::setMass(GLfloat newMass)
@@ -74,6 +79,11 @@ void Item::draw()
 
 } 
 
+void Item::drawBBox()
+{
+
+} 
+
 void Item::rotate()
 {
     spin += spinMomentum;
@@ -81,6 +91,8 @@ void Item::rotate()
         spin -= 360.0;
     else if (spin < -360.0)
         spin += 360.0;
+
+    this->updateBBox();
     //glutPostRedisplay();
 }
 
@@ -130,4 +142,18 @@ void Item::setClickPos(GLdouble x, GLdouble y)
 {
     xclickpos = x;
     yclickpos = y;
+}
+
+BBox* Item::getBBox()
+{
+    return bbox;
+}
+
+void Item::updateBBox()
+{
+    delete bbox;
+    GLdouble theta = (spin * (2 * PI)) / 360; //theta is spin in radians
+    GLdouble w = size * cos(theta);
+    GLdouble h = size * sin(theta);
+    bbox = new BBox(x-w, y-h, x+w, y+h);
 }

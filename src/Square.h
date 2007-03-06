@@ -10,6 +10,6 @@ class Square : public Item
         Square(int xpos, int ypos, int size);
         ~Square();
         void draw();
-
+        void drawBBox();
 };
 #endif
