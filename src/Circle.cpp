@@ -42,9 +42,15 @@ void Circle::draw()
 
     glTranslatef(objx, -objy, objz);
     glRotatef(spin, 0, 0, objz);
-    glColor3f(red, green, blue);
+    glColor4f(red, green, blue, 0.8);
     gluDisk(quad, 0, size, 30, 1);
-    glColor3f(0,0,0);
+    glColor4f(0,0,0, 0.8);
     gluDisk(quad, 0, size*.9, 30, 1);
     glPopMatrix();
 } 
+
+void Circle::updateBBox()
+{
+    delete bbox;
+    bbox = new BBox(x - size, y - size, x + size, y + size);
+}

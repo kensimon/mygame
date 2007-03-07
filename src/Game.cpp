@@ -5,13 +5,12 @@
 #include <iostream>
 
 Game* Game::instance = NULL;
-//int Game::framewait = 16;
-//int Game::curbutton = 0;
 
 Game::Game()
 {
     ic = new ItemCollection();
     phys = new Physics(ic);
+    drawBBoxes = false;
     framewait = 16;
     curbutton = 0;
 };
@@ -31,11 +30,13 @@ int Game::init(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(500, 500);
+    glutInitWindowSize(900, 900);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("mygame");
     glClearColor(0.0, 0.0, 0.8, 0.0);
     glShadeModel(GL_FLAT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glutDisplayFunc(Game::display);
     glutReshapeFunc(Game::reshape);
     glutMouseFunc(Game::mouse);
@@ -49,8 +50,8 @@ int Game::init(int argc, char **argv)
 
 void Game::timerFunc(int)
 {
-    Game::display();
     instance->phys->tick();
+    Game::display();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
         printf ("%s\n", error);
@@ -90,6 +91,9 @@ void Game::keyboardFunc(unsigned char key, int, int)
             break;
         case 'p':
             instance->ic->pop();
+            break;
+        case 'b':
+            instance->drawBBoxes = !(instance->drawBBoxes);
             break;
         case 'l':
             instance->ic->removeItem(instance->ic->length() - 1);

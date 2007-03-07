@@ -1,4 +1,5 @@
 #include "Item.h"
+#include <iostream>
 
 Item::Item()
 {
@@ -76,12 +77,30 @@ GLdouble Item::gety()
 
 void Item::draw()
 {
-
 } 
 
 void Item::drawBBox()
 {
+    GLdouble objz = 0;
+    GLdouble modelMatrix[16];
+    GLdouble projMatrix[16];
+    GLint viewport[4];
 
+    glPushMatrix();
+    glLoadIdentity();
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
+
+    /* Move the square to where it belongs */
+    glTranslatef(objx, -objy, objz);
+    glColor4f(red, green, blue, 0.3);
+    glRectf(bbox->min[0] - x, bbox->min[1] - y, bbox->max[0] - x, bbox->max[1] - y);
+    //glRectf(10,-10, -10, 10);
+    glPopMatrix();
 } 
 
 void Item::rotate()
@@ -151,9 +170,4 @@ BBox* Item::getBBox()
 
 void Item::updateBBox()
 {
-    delete bbox;
-    GLdouble theta = (spin * (2 * PI)) / 360; //theta is spin in radians
-    GLdouble w = size * cos(theta);
-    GLdouble h = size * sin(theta);
-    bbox = new BBox(x-w, y-h, x+w, y+h);
 }

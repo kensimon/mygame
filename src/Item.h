@@ -14,7 +14,7 @@ class BBox
     public:
     BBox()  {}
 
-    BBox(int a_minX, int a_minY, int a_maxX, int a_maxY)
+    BBox(GLdouble a_minX, GLdouble a_minY, GLdouble a_maxX, GLdouble a_maxY)
     {
         min[0] = a_minX;
         min[1] = a_minY;
@@ -23,17 +23,8 @@ class BBox
         max[1] = a_maxY;
     }
 
-    BBox(GLdouble a_minX, GLdouble a_minY, GLdouble a_maxX, GLdouble a_maxY)
-    {
-        min[0] = (int)a_minX;
-        min[1] = (int)a_minY;
-
-        max[0] = (int)a_maxX;
-        max[1] = (int)a_maxY;
-    }
-
-    int min[2];
-    int max[2];
+    GLdouble min[2];
+    GLdouble max[2];
 };
 
 class Item
@@ -50,6 +41,7 @@ class Item
         GLdouble getobjy();
         void rotate();
         virtual void draw();
+        void drawBBox();
         GLfloat getSpin();
         Item* next;
         Item* previous;
@@ -62,8 +54,7 @@ class Item
         void setClickPos(GLdouble, GLdouble);
         void dragTo(GLdouble, GLdouble);
         BBox* getBBox();
-        void updateBBox();
-        void drawBBox();
+        virtual void updateBBox();
 
     protected:
         GLdouble x;

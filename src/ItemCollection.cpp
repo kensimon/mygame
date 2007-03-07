@@ -1,5 +1,6 @@
 #include "ItemCollection.h"
 #include "Square.h"
+#include "Game.h"
 #include <iostream>
 
 /*
@@ -144,11 +145,14 @@ void ItemCollection::pop()
 
 void ItemCollection::drawAll()
 {
+    bool dbb = Game::getInstance()->drawBBoxes;
     Item* cur = head;
     while (cur != NULL)
     {
-        cur->rotate();
         //cur->moveTo((cur->getx() + cur->getMomentumX()), (cur->gety() + cur->getMomentumY()));
+        if (dbb) {
+            cur->drawBBox();
+        }
         cur->draw();
         cur = cur->next;
     }

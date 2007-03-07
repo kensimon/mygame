@@ -10,5 +10,7 @@ class Circle : public Item
         Circle();
         ~Circle();
         void draw();
+        void drawBBox();
+        void updateBBox();
 };
 #endif

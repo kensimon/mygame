@@ -27,7 +27,6 @@ Square::~Square()
 
 void Square::draw()
 {
-    drawBBox();
     GLdouble objz = 0;
     GLdouble modelMatrix[16];
     GLdouble projMatrix[16];
@@ -45,21 +44,16 @@ void Square::draw()
     /* Move the square to where it belongs */
     glTranslatef(objx, -objy, objz);
     glRotatef(spin, 0, 0, objz);
-    glColor3f(red, green, blue);
+    glColor4f(red, green, blue, 0.8);
     glRectf(size, -size, -size, size);
-    glColor3f(0, 0, 0);
+    glColor4f(0.0, 0.0, 0.0, 0.8);
     glRectf(size*.9, -(size*.9), -(size*.9), size*.9);
     glPopMatrix();
     //glutPostRedisplay();
 } 
 
-void Square::drawBBox()
+void Square::updateBBox()
 {
-    GLdouble objz = 0;
-    GLdouble modelMatrix[16];
-    GLdouble projMatrix[16];
-    GLint viewport[4];
-
     GLdouble csize = sqrt((size * size) + (size * size));
     GLdouble theta = ((((int)spin % 90) + 45) * (2.0 * PI)) / 360.0; //theta is spin in radians
     GLdouble w, h;
@@ -67,20 +61,6 @@ void Square::drawBBox()
     h = csize * sin(theta);
 
     w = h = max(w,h);
-
-    glPushMatrix();
-    glLoadIdentity();
-
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
-
-    /* Move the square to where it belongs */
-    glTranslatef(objx, -objy, objz);
-    glColor3f(red * 0.5, green * 0.5, blue * 0.5);
-    glRectf(w, h, -w, -h);
-    //glRectf(10,-10, -10, 10);
-    glPopMatrix();
-} 
+    //delete bbox;
+    bbox = new BBox(x-w, y-h, x+w, y+h);
+}

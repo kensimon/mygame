@@ -11,5 +11,6 @@ class Square : public Item
         ~Square();
         void draw();
         void drawBBox();
+        void updateBBox();
 };
 #endif

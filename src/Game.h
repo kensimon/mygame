@@ -5,13 +5,12 @@
 #include "ItemCollection.h"
 #include "Physics.h"
 
-#define DEFAULT_MOUSE_POS 65535
-
 class Game
 {
     public:
         static Game* getInstance();
         int init(int, char**);
+        bool drawBBoxes;
 
     private:
         static void display();

@@ -16,8 +16,8 @@ void Physics::tick()
     while (cur != NULL)
     {
         //cur->moveTo(cur->getx(), cur->gety() + 1);
-
-
+        cur->rotate();
+        cur->updateBBox();
         cur = cur->next;
     }
 }
