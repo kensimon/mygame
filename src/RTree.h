@@ -8,6 +8,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <GL/glut.h>
 
 #define ASSERT assert // RTree uses ASSERT( condition )
 

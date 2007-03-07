@@ -1,4 +1,5 @@
 #include "Circle.h"
+#include "Game.h"
 
 Circle::Circle()
 {
@@ -51,6 +52,8 @@ void Circle::draw()
 
 void Circle::updateBBox()
 {
+    Game::getInstance()->getItemCollection()->getRTree()->Remove(bbox->min, bbox->max, this);
     delete bbox;
     bbox = new BBox(x - size, y - size, x + size, y + size);
+    Game::getInstance()->getItemCollection()->getRTree()->Insert(bbox->min, bbox->max, this);
 }

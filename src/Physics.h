@@ -9,6 +9,9 @@ class Physics
         Physics(ItemCollection* ic);
         ~Physics();
         void tick();
+        static bool collisionCallback(Item*, void*);
+
+    protected:
 
     private:
         ItemCollection* ic;

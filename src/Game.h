@@ -11,6 +11,8 @@ class Game
         static Game* getInstance();
         int init(int, char**);
         bool drawBBoxes;
+        ItemCollection* getItemCollection();
+        Physics* getPhysicsEngine();
 
     private:
         static void display();

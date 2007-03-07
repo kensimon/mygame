@@ -1,3 +1,4 @@
+#include "Game.h"
 #include "Square.h"
 
 Square::Square()
@@ -54,6 +55,7 @@ void Square::draw()
 
 void Square::updateBBox()
 {
+    Game::getInstance()->getItemCollection()->getRTree()->Remove(bbox->min, bbox->max, this);
     GLdouble csize = sqrt((size * size) + (size * size));
     GLdouble theta = ((((int)spin % 90) + 45) * (2.0 * PI)) / 360.0; //theta is spin in radians
     GLdouble w, h;
@@ -63,4 +65,5 @@ void Square::updateBBox()
     w = h = max(w,h);
     //delete bbox;
     bbox = new BBox(x-w, y-h, x+w, y+h);
+    Game::getInstance()->getItemCollection()->getRTree()->Insert(bbox->min, bbox->max, this);
 }

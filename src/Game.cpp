@@ -189,3 +189,13 @@ void Game::dragMouse(int x, int y)
             instance->ic->getSelected()->dragTo(x, y);
         }
 }
+
+ItemCollection* Game::getItemCollection()
+{
+    return this->ic;
+}
+
+Physics* Game::getPhysicsEngine()
+{
+    return this->phys;
+}
