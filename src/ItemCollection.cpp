@@ -14,7 +14,6 @@ ItemCollection::ItemCollection()
     head->previous = NULL;
     tail = head;
     _length = 0;
-    rtree = new RTree<Item*, GLdouble, 2>();
 }
 
 
@@ -35,7 +34,6 @@ void ItemCollection::push(Item* n)
     n->previous = cur;
     tail = n;
     _length++;
-    rtree->Insert(n->getBBox()->min, n->getBBox()->max, n);
 }
 
 Item* ItemCollection::get(int num)
@@ -95,7 +93,6 @@ void ItemCollection::removeItem(Item* i)
                 if (cur == tail)
                     tail = cur->previous;
 
-                rtree->Remove(cur->getBBox()->min, cur->getBBox()->max, cur);
                 delete cur;
                 _length--;
                 return;
@@ -124,7 +121,6 @@ void ItemCollection::removeItem(int num)
                 if (cur == tail)
                     tail = cur->previous;
 
-                rtree->Remove(cur->getBBox()->min, cur->getBBox()->max, cur);
                 delete cur;
                 _length--;
                 return;
@@ -140,7 +136,6 @@ void ItemCollection::pop()
 {
     if (tail->previous != NULL)
     {
-        rtree->Remove(tail->getBBox()->min, tail->getBBox()->max, tail);
         tail = tail->previous;
         delete tail->next;
         tail->next = NULL;
@@ -236,9 +231,4 @@ Item* ItemCollection::getSelected()
 int ItemCollection::length()
 {
     return _length;
-}
-
-RTree<Item*, GLdouble, 2>* ItemCollection::getRTree()
-{
-    return rtree;
 }

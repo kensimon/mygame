@@ -2,6 +2,7 @@
 #include "Square.h"
 #include "Circle.h"
 #include "ItemCollection.h"
+#include "Config.h"
 #include <iostream>
 
 Game* Game::instance = NULL;
@@ -13,6 +14,8 @@ Game::Game()
     drawBBoxes = false;
     framewait = 16;
     curbutton = 0;
+    width = WINSIZE_X;
+    height = WINSIZE_Y;
 };
 
 Game::~Game()
@@ -30,7 +33,7 @@ int Game::init(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(900, 900);
+    glutInitWindowSize(width, height);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("mygame");
     glClearColor(0.0, 0.0, 0.8, 0.0);
@@ -67,9 +70,18 @@ void Game::display()
 
 void Game::reshape(int w, int h)
 {
+    instance->width = w;
+    instance->height = h;
     glViewport(0, 0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+    if (w <= h)
+        gluOrtho2D (-1.0, 1.0,
+                -1.0*(GLfloat)h/(GLfloat)w, 1.0*(GLfloat)h/(GLfloat)w);
+    else
+        gluOrtho2D (-1.0*(GLfloat)w/(GLfloat)h,
+                1.0*(GLfloat)w/(GLfloat)h, -1.0, 1.0);
+
     glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -84,7 +96,9 @@ void Game::keyboardFunc(unsigned char key, int, int)
             break;
         case 'c':
             printf("x: %f, y: %f\n", instance->ic->getSelected()->getx(), instance->ic->getSelected()->gety());
-            printf("spin: %f\n\n", instance->ic->getSelected()->getSpin());
+            printf("spin: %f\n", instance->ic->getSelected()->getSpin());
+            printf("momentumx: %f, momentumy: %f\n\n", instance->ic->getSelected()->momentumX,
+                    instance->ic->getSelected()->momentumY);
             break;
         case 'd':
             instance->ic->removeItem(instance->ic->getSelected());
@@ -163,13 +177,18 @@ void Game::mouse(int button, int state, int x, int y)
             {
                 instance->ic->select((GLdouble)x, (GLdouble)y);
                 instance->ic->getSelected()->setClickPos((GLdouble)x, (GLdouble)y);
+                instance->ic->getSelected()->grabbed = true;
+            }
+            if (state == GLUT_UP)
+            {
+                instance->ic->getSelected()->grabbed = false;
             }
             break;
         case GLUT_RIGHT_BUTTON:
             if (state == GLUT_DOWN)
             {
                 //instance->ic->getSelected()->moveTo(x, y);
-                instance->ic->push(new Circle(x, y, 10));
+                instance->ic->push(new Circle(x, y));
             }
             break;
         case GLUT_MIDDLE_BUTTON:
@@ -198,4 +217,14 @@ ItemCollection* Game::getItemCollection()
 Physics* Game::getPhysicsEngine()
 {
     return this->phys;
+}
+
+int Game::getWidth()
+{
+    return width;
+}
+
+int Game::getHeight()
+{
+    return height;
 }

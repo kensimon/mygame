@@ -18,14 +18,12 @@ public:
 		void removeItem(int num);
         int length();
 		Item* getSelected();
-        RTree<Item*, GLdouble, 2>* getRTree();
 
 private:
 		Item* selected;
 		Item* head;
 		Item* tail;
         int _length;
-        RTree<Item*, GLdouble, 2>* rtree;
 
 };
 

@@ -13,13 +13,16 @@ Item::Item()
     red = 1.0;
     green = 1.0;
     blue = 1.0;
-    momentumX = 0;
+    momentumX = 10;
     momentumY = 0;
 
     //Can't think of anywhere better to put them.
     //They should get moved the first time they're drawn.
     objx = 0;
     objy = 0;
+    objsizex = 0;
+    objsizey = 0;
+    objsizez = 0;
 
     mass = 1;
 
@@ -27,18 +30,18 @@ Item::Item()
     yclickpos = 0;
 
     bbox = new BBox(0, 0, 0, 0);
+
+    grabbed = false;
 }
 
 Item::~Item()
 {
 }
 
-void Item::moveTo(GLfloat a, GLfloat b)
+void Item::moveTo(GLdouble x, GLdouble y)
 {
-    momentumX = (a - x);
-    momentumY = (b - y);
-    x = a;
-    y = b;
+    this->x = x;
+    this->y = y;
     this->updateBBox();
     //printf("I moved to %lf, %lf\n", x, y);
 }
@@ -48,19 +51,22 @@ void Item::dragTo(GLdouble a, GLdouble b)
     x += a - xclickpos;
     y += b - yclickpos;
 
+    momentumX = (a - xclickpos);
+    momentumY = (b - yclickpos);
+
     xclickpos = a;
     yclickpos = b;
     this->updateBBox();
 }
 
-void Item::resize (GLfloat x)
+void Item::resize (GLdouble x)
 {
     //printf("Resizing to %lf\n", x);
     size += x;
     this->updateBBox();
 }
 
-void Item::setMass(GLfloat newMass)
+void Item::setMass(GLdouble newMass)
 {
     mass = newMass;
 }
@@ -115,31 +121,21 @@ void Item::rotate()
     //glutPostRedisplay();
 }
 
-GLfloat Item::getSpin()
+GLdouble Item::getSpin()
 {
     return spin;
 }
 
-GLfloat Item::getSize()
+GLdouble Item::getSize()
 {
     return size;
 }
 
-void Item::setColor(GLfloat red, GLfloat green, GLfloat blue)
+void Item::setColor(GLdouble red, GLdouble green, GLdouble blue)
 {
     this->red = red;
     this->green = green;
     this->blue = blue;
-}
-
-GLfloat Item::getMomentumX()
-{
-    return momentumX * .9;
-}
-
-GLfloat Item::getMomentumY()
-{
-    return momentumY * .9;
 }
 
 GLdouble Item::getobjx()
@@ -152,7 +148,7 @@ GLdouble Item::getobjy()
     return objy;
 }
 
-GLfloat Item::getMass()
+GLdouble Item::getMass()
 {
     return mass;
 }

@@ -3,7 +3,6 @@
 
 #include <GL/glut.h>
 #include <math.h>
-#include "RTree.h"
 #define PI 3.1415926535
 
 #define min(x,y) x < y ? x : y
@@ -32,9 +31,9 @@ class Item
     public:
         Item();
         ~Item();
-        void moveTo(GLfloat, GLfloat);
-        void resize(GLfloat x);
-        void setMass(GLfloat newMass);
+        void moveTo(GLdouble x, GLdouble y);
+        void resize(GLdouble x);
+        void setMass(GLdouble newMass);
         GLdouble getx();
         GLdouble gety();
         GLdouble getobjx();
@@ -42,32 +41,34 @@ class Item
         void rotate();
         virtual void draw();
         void drawBBox();
-        GLfloat getSpin();
+        GLdouble getSpin();
         Item* next;
         Item* previous;
-        GLfloat getSize();
-        void setColor(GLfloat red, GLfloat green, GLfloat blue);
+        GLdouble getSize();
+        void setColor(GLdouble red, GLdouble green, GLdouble blue);
         int spinMomentum;
-        GLfloat getMomentumX();
-        GLfloat getMomentumY();
-        GLfloat getMass();
+        GLdouble momentumX;
+        GLdouble momentumY;
+        GLdouble getMass();
         void setClickPos(GLdouble, GLdouble);
         void dragTo(GLdouble, GLdouble);
         BBox* getBBox();
+        bool grabbed;
 
     protected:
         GLdouble x;
         GLdouble y;
         GLdouble objx;
         GLdouble objy;
+        GLdouble objsizex;
+        GLdouble objsizey;
+        GLdouble objsizez;
         GLdouble red;
         GLdouble blue;
         GLdouble green;
-        GLfloat spin;
-        GLfloat size;
-        GLfloat momentumX;
-        GLfloat momentumY;
-        GLfloat mass;
+        GLdouble spin;
+        GLdouble size;
+        GLdouble mass;
         GLdouble xclickpos;
         GLdouble yclickpos;
         BBox* bbox;

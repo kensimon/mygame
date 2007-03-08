@@ -13,6 +13,8 @@ class Game
         bool drawBBoxes;
         ItemCollection* getItemCollection();
         Physics* getPhysicsEngine();
+        int getHeight();
+        int getWidth();
 
     private:
         static void display();
@@ -27,6 +29,8 @@ class Game
         int framewait;
         ItemCollection* ic;
         Physics* phys;
+        int width;
+        int height;
 
     protected:
         Game();

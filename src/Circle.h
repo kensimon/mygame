@@ -6,7 +6,7 @@
 class Circle : public Item
 {
     public:
-        Circle(int xpos, int ypos, int size);
+        Circle(int xpos, int ypos);
         Circle();
         ~Circle();
         void draw();
