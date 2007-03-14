@@ -103,6 +103,9 @@ void Game::keyboardFunc(unsigned char key, int, int)
         case 'd':
             instance->ic->removeItem(instance->ic->getSelected());
             break;
+        case 'g':
+            instance->phys->gravityOn = !instance->phys->gravityOn;
+            break;
         case 'p':
             instance->ic->pop();
             break;

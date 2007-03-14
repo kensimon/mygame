@@ -9,6 +9,7 @@ class Physics
         Physics(ItemCollection* ic);
         ~Physics();
         void tick();
+        bool gravityOn;
 #if 0
         static bool collisionCallback(Item*, void*);
 #endif

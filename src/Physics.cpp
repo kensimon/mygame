@@ -5,6 +5,7 @@
 Physics::Physics(ItemCollection* ic)
 {
     this->ic = ic;
+    gravityOn = true;
 }
 
 Physics::~Physics()
@@ -45,7 +46,7 @@ void Physics::checkBoundaries(Item* item)
     }
     /* Calculate new y position */
     /* Gravity adds to velocity */
-    if ((item->gety() < instance->getHeight()) || (item->momentumY != 0))
+    if (gravityOn && ((item->gety() < instance->getHeight()) || (item->momentumY != 0)))
     {
         item->momentumY += GRAVITY;
     }
@@ -64,7 +65,7 @@ void Physics::checkBoundaries(Item* item)
 
         item->moveTo(item->getx(), item->gety() + item->momentumY);
 
-        if (fabs(item->momentumY) < GRAVITY)
+        if (gravityOn && fabs(item->momentumY) < GRAVITY)
             /* This helps dampen rounding errors that cause balls to
                bounce forever */
             item->momentumY = 0;
@@ -123,7 +124,7 @@ void Physics::checkBoundaries(Item* item)
 
     /* Slow ball if it is rolling on the floor */
 
-    if (fabs(item->gety()) >= instance->getHeight() - GRAVITY &&
+    if (gravityOn && fabs(item->gety()) >= instance->getHeight() - GRAVITY &&
             item->momentumY == 0)
         item->momentumX *= ELASTICITY;
 
