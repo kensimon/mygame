@@ -11,3 +11,8 @@ autom4te.cache
 config.guess
 config.sub
 **/*.swp
+*.suo
+*.vcproj.*.user
+mygame.ncb
+Debug
+Release
