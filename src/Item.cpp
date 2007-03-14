@@ -13,7 +13,7 @@ Item::Item()
     red = 1.0;
     green = 1.0;
     blue = 1.0;
-    momentumX = 10;
+    momentumX = 0;
     momentumY = 0;
 
     //Can't think of anywhere better to put them.

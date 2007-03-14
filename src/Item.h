@@ -54,6 +54,7 @@ class Item
         void dragTo(GLdouble, GLdouble);
         BBox* getBBox();
         bool grabbed;
+        virtual void updateBBox();
 
     protected:
         GLdouble x;
@@ -72,7 +73,6 @@ class Item
         GLdouble xclickpos;
         GLdouble yclickpos;
         BBox* bbox;
-        virtual void updateBBox();
 };
 
 #endif

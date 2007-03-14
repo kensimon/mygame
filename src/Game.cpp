@@ -194,7 +194,7 @@ void Game::mouse(int button, int state, int x, int y)
         case GLUT_MIDDLE_BUTTON:
             if (state == GLUT_DOWN)
             {
-                instance->ic->push(new Square(x, y, 10));
+                instance->ic->push(new Square(x, y));
             }
         default:
             break;

@@ -3,25 +3,26 @@
 
 Circle::Circle()
 {
-    x = 250;
-    y = 250;
+    *this = Circle(250, 250);
+}
+
+Circle::Circle(int xpos, int ypos)
+{
+    *this = Circle(xpos, ypos, 3);
+}
+
+Circle::Circle(int xpos, int ypos, int size)
+{
+    this->x = xpos;
+    this->y = ypos;
+    this->size = size;
     spin = 0;
-    size = 3;
     next = NULL;
     objx = 0;
     objy = 0;
     objsizex = 0;
     objsizey = 0;
     objsizez = 0;
-}
-
-Circle::Circle(int xpos, int ypos)
-{
-    this->x = xpos;
-    this->y = ypos;
-    size = 3;
-    spin = 0;
-    next = NULL;
 }
 
 Circle::~Circle()

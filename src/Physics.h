@@ -19,8 +19,6 @@ class Physics
         ItemCollection* ic;
         void checkBoundaries(Item* item);
         void checkCollisions(Item* item);
-        void moveWithMomentum(Item* item);
-        void applyGravity(Item* item);
 };
 
 #endif

@@ -3,13 +3,12 @@
 
 Square::Square()
 {
-    x = 250;
-    y = 250;
-    spin = 0;
-    size = 10;
-    next = NULL;
-    objx = 0;
-    objy = 0;
+    *this = Square(250, 250);
+}
+
+Square::Square(int xpos, int ypos)
+{
+    *this = Square(xpos, ypos, 3);
 }
 
 Square::Square(int xpos, int ypos, int size)
@@ -18,7 +17,6 @@ Square::Square(int xpos, int ypos, int size)
     this->y = ypos;
     this->size = size;
     spin = 0;
-    size = 10;
     next = NULL;
 }
 
@@ -56,7 +54,7 @@ void Square::draw()
 void Square::updateBBox()
 {
     GLdouble csize = sqrt((size * size) + (size * size));
-    GLdouble theta = ((((int)spin % 90) + 45) * (2.0 * PI)) / 360.0; //theta is spin in radians
+    GLdouble theta = ((((int)spin % 90) + 45) * (2.0 * PI)) / 360.0;
     GLdouble w, h;
     w = csize * cos(theta);
     h = csize * sin(theta);
