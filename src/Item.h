@@ -5,8 +5,13 @@
 #include <math.h>
 #define PI 3.1415926535
 
+#ifndef min
 #define min(x,y) x < y ? x : y
+#endif
+
+#ifndef max
 #define max(x,y) x > y ? x : y
+#endif
 
 class BBox
 {

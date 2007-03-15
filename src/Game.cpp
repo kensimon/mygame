@@ -36,7 +36,7 @@ int Game::init(int argc, char **argv)
     glutInitWindowSize(width, height);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("mygame");
-    glClearColor(0.0, 0.0, 0.8, 0.0);
+    glClearColor((GLclampf)0.0, (GLclampf)0.0, (GLclampf)0.8, (GLclampf)0.0);
     glShadeModel(GL_FLAT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -59,6 +59,9 @@ void Game::timerFunc(int)
     if (error != GL_NO_ERROR)
         printf ("%s\n", error);
     glutTimerFunc(instance->framewait, Game::timerFunc, 0);
+#ifdef _WINDOWS_ //Lubix seems to sleep just fine without this.
+	Sleep(instance->framewait);
+#endif
 }
 
 void Game::display()

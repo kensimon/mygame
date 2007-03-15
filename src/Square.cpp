@@ -41,12 +41,12 @@ void Square::draw()
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
 
     /* Move the square to where it belongs */
-    glTranslatef(objx, -objy, objz);
-    glRotatef(spin, 0, 0, objz);
-    glColor4f(red, green, blue, 0.8);
-    glRectf(size, -size, -size, size);
-    glColor4f(0.0, 0.0, 0.0, 0.8);
-    glRectf(size*.9, -(size*.9), -(size*.9), size*.9);
+    glTranslated(objx, -objy, objz);
+    glRotated(spin, 0, 0, objz);
+    glColor4d(red, green, blue, 0.8);
+    glRectd(size, -size, -size, size);
+    glColor4d(0.0, 0.0, 0.0, 0.8);
+    glRectd(size*.9, -(size*.9), -(size*.9), size*.9);
     glPopMatrix();
     //glutPostRedisplay();
 } 

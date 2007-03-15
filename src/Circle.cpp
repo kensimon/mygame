@@ -45,11 +45,11 @@ void Circle::draw()
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
     gluUnProject(size, 0, 0, modelMatrix, projMatrix, viewport, &objsizex, &objsizey, &objsizez);
 
-    glTranslatef(objx, -objy, objz);
-    glRotatef(spin, 0, 0, objz);
-    glColor4f(red, green, blue, 0.8);
+    glTranslated(objx, -objy, objz);
+    glRotated(spin, 0, 0, objz);
+    glColor4d(red, green, blue, 0.8);
     gluDisk(quad, 0, size, 30, 1);
-    glColor4f(0,0,0, 0.8);
+    glColor4d(0,0,0, 0.8);
     gluDisk(quad, 0, size*.9, 30, 1);
     glPopMatrix();
 } 

@@ -102,10 +102,10 @@ void Item::drawBBox()
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
 
     /* Move the square to where it belongs */
-    glTranslatef(objx, -objy, objz);
-    glColor4f(red, green, blue, 0.3);
-    glRectf(bbox->min[0] - x, bbox->min[1] - y, bbox->max[0] - x, bbox->max[1] - y);
-    //glRectf(10,-10, -10, 10);
+    glTranslated(objx, -objy, objz);
+    glColor4d(red, green, blue, 0.3);
+    glRectd(bbox->min[0] - x, bbox->min[1] - y, bbox->max[0] - x, bbox->max[1] - y);
+    //glRectd(10,-10, -10, 10);
     glPopMatrix();
 } 
 
