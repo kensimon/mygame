@@ -9,6 +9,7 @@ class Game
 {
     public:
         static Game* getInstance();
+		bool isRendering;
         int init(int, char**);
         bool drawBBoxes;
         ItemCollection* getItemCollection();

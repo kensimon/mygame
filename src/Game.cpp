@@ -1,9 +1,9 @@
-#include <iostream>
 #include "Game.h"
 #include "Square.h"
 #include "Circle.h"
 #include "ItemCollection.h"
 #include "Config.h"
+#include <iostream>
 
 Game* Game::instance = NULL;
 
@@ -16,6 +16,7 @@ Game::Game()
     curbutton = 0;
     width = WINSIZE_X;
     height = WINSIZE_Y;
+	isRendering = false;
 };
 
 Game::~Game()
@@ -53,15 +54,19 @@ int Game::init(int argc, char **argv)
 
 void Game::timerFunc(int)
 {
+	if (instance->isRendering)
+		return;
+	instance->isRendering = true;
+	glutTimerFunc(instance->framewait, Game::timerFunc, 0);
     instance->phys->tick();
     Game::display();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
         printf ("%s\n", error);
-    glutTimerFunc(instance->framewait, Game::timerFunc, 0);
 #ifdef _WINDOWS_ //Lubix seems to sleep just fine without this.
 	Sleep(instance->framewait);
 #endif
+	instance->isRendering = false;
 }
 
 void Game::display()
