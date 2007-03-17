@@ -1,3 +1,11 @@
+mygame (0.0.4) feisty; urgency=low
+
+  * Physics!  (well, just gravity and bouncing off walls for now.)
+  * Fixed memory leaks
+  * Works in windows too!
+
+ -- Ken Simon <ken@ninkendo.org>  Fri, 16 Mar 2007 22:03:28 -0400
+
 mygame (0.0.3-2) feisty; urgency=low
 
   * Sync with git
