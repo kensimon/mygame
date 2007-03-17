@@ -18,7 +18,7 @@ Circle::Circle(int xpos, int ypos, int size)
 
 Circle::~Circle()
 {
-    free(quad);
+	gluDeleteQuadric(quad);
 }
 
 void Circle::draw()
