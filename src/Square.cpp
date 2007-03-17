@@ -1,16 +1,6 @@
 #include "Game.h"
 #include "Square.h"
 
-Square::Square()
-{
-    *this = Square(250, 250);
-}
-
-Square::Square(int xpos, int ypos)
-{
-    *this = Square(xpos, ypos, 3);
-}
-
 Square::Square(int xpos, int ypos, int size)
 {
     this->x = xpos;

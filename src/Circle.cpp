@@ -1,16 +1,6 @@
 #include "Circle.h"
 #include "Game.h"
 
-Circle::Circle()
-{
-    *this = Circle(250, 250);
-}
-
-Circle::Circle(int xpos, int ypos)
-{
-    *this = Circle(xpos, ypos, 3);
-}
-
 Circle::Circle(int xpos, int ypos, int size)
 {
     this->x = xpos;
@@ -23,16 +13,17 @@ Circle::Circle(int xpos, int ypos, int size)
     objsizex = 0;
     objsizey = 0;
     objsizez = 0;
+    quad = gluNewQuadric();
 }
 
 Circle::~Circle()
 {
+    free(quad);
 }
 
 void Circle::draw()
 {
     GLdouble objz = 0;
-    GLUquadric* quad = gluNewQuadric();
     GLdouble modelMatrix[16];
     GLdouble projMatrix[16];
     GLint viewport[4];

@@ -162,7 +162,6 @@ void ItemCollection::select(GLdouble x, GLdouble y)
 {
     /* Translate x and y into world coordinates */
     GLdouble objz = 0;
-    GLUquadric* quad = gluNewQuadric();
     GLdouble modelMatrix[16];
     GLdouble projMatrix[16];
     GLint viewport[4];

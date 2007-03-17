@@ -6,12 +6,13 @@
 class Circle : public Item
 {
     public:
-        Circle(int xpos, int ypos);
-        Circle(int xpos, int ypos, int size);
-        Circle();
+        Circle(int xpos = 250, int ypos = 250, int size = 3);
         ~Circle();
         void draw();
         void drawBBox();
         void updateBBox();
+
+    private:
+        GLUquadric* quad;
 };
 #endif

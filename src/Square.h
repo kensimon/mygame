@@ -6,9 +6,7 @@
 class Square : public Item
 {
     public:
-        Square();
-        Square(int xpos, int ypos, int size);
-        Square(int xpos, int ypos);
+        Square(int xpos = 250, int ypos = 250, int size = 3);
         ~Square();
         void draw();
         void drawBBox();

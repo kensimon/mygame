@@ -1,9 +1,9 @@
+#include <iostream>
 #include "Game.h"
 #include "Square.h"
 #include "Circle.h"
 #include "ItemCollection.h"
 #include "Config.h"
-#include <iostream>
 
 Game* Game::instance = NULL;
 

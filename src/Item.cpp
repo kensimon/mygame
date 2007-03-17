@@ -36,6 +36,7 @@ Item::Item()
 
 Item::~Item()
 {
+    delete bbox;
 }
 
 void Item::moveTo(GLdouble x, GLdouble y)
