@@ -6,7 +6,7 @@ Circle::Circle(int xpos, int ypos, int size)
     this->x = xpos;
     this->y = ypos;
     this->size = size;
-    spin = 0;
+    degrees = 0;
     next = NULL;
     objx = 0;
     objy = 0;
@@ -37,7 +37,7 @@ void Circle::draw()
     gluUnProject(size, 0, 0, modelMatrix, projMatrix, viewport, &objsizex, &objsizey, &objsizez);
 
     glTranslated(objx, -objy, objz);
-    glRotated(spin, 0, 0, objz);
+    glRotated(degrees, 0, 0, objz);
     glColor4d(red, green, blue, 0.8);
     gluDisk(quad, 0, size, 30, 1);
     glColor4d(0,0,0, 0.8);

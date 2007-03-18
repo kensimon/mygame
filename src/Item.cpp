@@ -5,7 +5,7 @@ Item::Item()
 {
     x = 0;
     y = 0;
-    spin = 0;
+    degrees = 0;
     spinMomentum = 0;
     size = 0;
     next = NULL;
@@ -112,19 +112,19 @@ void Item::drawBBox()
 
 void Item::rotate()
 {
-    spin += spinMomentum;
-    if (spin > 360.0)
-        spin -= 360.0;
-    else if (spin < -360.0)
-        spin += 360.0;
+    degrees += spinMomentum;
+    if (degrees > 360.0)
+        degrees -= 360.0;
+    else if (degrees < -360.0)
+        degrees += 360.0;
 
     this->updateBBox();
     //glutPostRedisplay();
 }
 
-GLdouble Item::getSpin()
+GLdouble Item::getRotation()
 {
-    return spin;
+    return degrees;
 }
 
 GLdouble Item::getSize()

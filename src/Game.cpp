@@ -58,11 +58,15 @@ void Game::timerFunc(int)
 		return;
 	instance->isRendering = true;
 	glutTimerFunc(instance->framewait, Game::timerFunc, 0);
+	/* Start timer functions here */
+
     instance->phys->tick();
     Game::display();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
         printf ("%s\n", error);
+
+	/* End timer functions here */
 #ifdef _WINDOWS_ //Lubix seems to sleep just fine without this.
 	Sleep(instance->framewait);
 #endif
@@ -104,7 +108,7 @@ void Game::keyboardFunc(unsigned char key, int, int)
             break;
         case 'c':
             printf("x: %f, y: %f\n", instance->ic->getSelected()->getx(), instance->ic->getSelected()->gety());
-            printf("spin: %f\n", instance->ic->getSelected()->getSpin());
+            printf("rotation: %f\n", instance->ic->getSelected()->getRotation());
             printf("momentumx: %f, momentumy: %f\n\n", instance->ic->getSelected()->momentumX,
                     instance->ic->getSelected()->momentumY);
             break;
@@ -169,10 +173,10 @@ void Game::specialFunc(int key, int x, int y)
             instance->ic->getSelected()->resize(-1);
             break;
         case GLUT_KEY_LEFT:
-            instance->ic->getSelected()->spinMomentum += 1;
+            instance->ic->getSelected()->spinMomentum -= 1;
             break;
         case GLUT_KEY_RIGHT:
-            instance->ic->getSelected()->spinMomentum -= 1;
+            instance->ic->getSelected()->spinMomentum += 1;
             break;
         default:
             break;

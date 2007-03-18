@@ -6,17 +6,19 @@
 #define PI 3.1415926535
 
 #ifndef min
-#define min(x,y) x < y ? x : y
+#define min(x,y) (((x) < (y)) ? (x) : (y))
 #endif
 
 #ifndef max
-#define max(x,y) x > y ? x : y
+#define max(x,y) (((x) > (y)) ? (x) : (y))
 #endif
 
 class BBox
 {
     public:
     BBox()  {}
+	GLdouble min[2];
+    GLdouble max[2];
 
     BBox(GLdouble a_minX, GLdouble a_minY, GLdouble a_maxX, GLdouble a_maxY)
     {
@@ -26,9 +28,6 @@ class BBox
         max[0] = a_maxX;
         max[1] = a_maxY;
     }
-
-    GLdouble min[2];
-    GLdouble max[2];
 };
 
 class Item
@@ -43,15 +42,15 @@ class Item
         GLdouble gety();
         GLdouble getobjx();
         GLdouble getobjy();
+        int getSpinMomentum();
         void rotate();
         virtual void draw();
         void drawBBox();
-        GLdouble getSpin();
+        GLdouble getRotation();
         Item* next;
         Item* previous;
         GLdouble getSize();
         void setColor(GLdouble red, GLdouble green, GLdouble blue);
-        int spinMomentum;
         GLdouble momentumX;
         GLdouble momentumY;
         GLdouble getMass();
@@ -60,6 +59,7 @@ class Item
         BBox* getBBox();
         bool grabbed;
         virtual void updateBBox();
+        int spinMomentum;
 
     protected:
         GLdouble x;
@@ -72,7 +72,7 @@ class Item
         GLdouble red;
         GLdouble blue;
         GLdouble green;
-        GLdouble spin;
+        GLdouble degrees;
         GLdouble size;
         GLdouble mass;
         GLdouble xclickpos;

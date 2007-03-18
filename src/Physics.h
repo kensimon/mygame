@@ -18,8 +18,6 @@ class Physics
 
     private:
         ItemCollection* ic;
-        void checkBoundaries(Item* item);
-        void checkCollisions(Item* item);
 };
 
 #endif

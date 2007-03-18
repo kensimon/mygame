@@ -52,30 +52,6 @@ Item* ItemCollection::get(int num)
     return NULL;
 }
 
-#if 0
-Item** ItemCollection::toArray()
-{
-    Item** a = new Item*[_length];
-    Item* cur = head->next;
-    int i = 0;
-    while (cur != NULL && i < _length)
-    {
-        a[i] = cur;
-        cur = cur->next;
-        i++;
-    }
-
-    //fill in the rest with NULL's, in case for some reason a node was
-    //removed while we were crawling through it.
-    while (i < _length)
-    {
-        a[i] = NULL;
-    }
-
-    return a;
-}
-#endif
-
 void ItemCollection::removeItem(Item* i)
 {
     Item* cur = head;
@@ -95,6 +71,9 @@ void ItemCollection::removeItem(Item* i)
 
                 delete cur;
                 _length--;
+				/* If we just deleted selected, make sure to reset what selected is (head) */
+				if (cur == selected)
+					selected = head;
                 return;
             }
             //else they're trying to delete head, which we won't allow.
@@ -121,6 +100,8 @@ void ItemCollection::removeItem(int num)
                 if (cur == tail)
                     tail = cur->previous;
 
+				if (cur == selected)
+					selected = head;
                 delete cur;
                 _length--;
                 return;
@@ -136,6 +117,8 @@ void ItemCollection::pop()
 {
     if (tail->previous != NULL)
     {
+		if (tail == selected)
+			selected = head;
         tail = tail->previous;
         delete tail->next;
         tail->next = NULL;
@@ -149,7 +132,6 @@ void ItemCollection::drawAll()
     Item* cur = head;
     while (cur != NULL)
     {
-        //cur->moveTo((cur->getx() + cur->getMomentumX()), (cur->gety() + cur->getMomentumY()));
         if (dbb) {
             cur->drawBBox();
         }
@@ -197,7 +179,8 @@ void ItemCollection::select(GLdouble x, GLdouble y)
     if (cur == NULL)
     {
         /* Select nothing. */
-        selected->setColor(1,1,1);
+		if (selected != head)
+			selected->setColor(1,1,1);
         selected = head;
         cur = head;
     }

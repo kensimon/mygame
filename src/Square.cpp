@@ -6,7 +6,7 @@ Square::Square(int xpos, int ypos, int size)
     this->x = xpos;
     this->y = ypos;
     this->size = size;
-    spin = 0;
+    degrees = 0;
     next = NULL;
 }
 
@@ -32,7 +32,7 @@ void Square::draw()
 
     /* Move the square to where it belongs */
     glTranslated(objx, -objy, objz);
-    glRotated(spin, 0, 0, objz);
+    glRotated(degrees, 0, 0, objz);
     glColor4d(red, green, blue, 0.8);
     glRectd(size, -size, -size, size);
     glColor4d(0.0, 0.0, 0.0, 0.8);
@@ -44,7 +44,7 @@ void Square::draw()
 void Square::updateBBox()
 {
     GLdouble csize = sqrt((size * size) + (size * size));
-    GLdouble theta = ((((int)spin % 90) + 45) * (2.0 * PI)) / 360.0;
+    GLdouble theta = ((((int)degrees % 90) + 45) * (2.0 * PI)) / 360.0;
     GLdouble w, h;
     w = csize * cos(theta);
     h = csize * sin(theta);
