@@ -109,8 +109,8 @@ void Game::keyboardFunc(unsigned char key, int, int)
         case 'c':
             printf("x: %f, y: %f\n", instance->ic->getSelected()->getx(), instance->ic->getSelected()->gety());
             printf("rotation: %f\n", instance->ic->getSelected()->getRotation());
-            printf("momentumx: %f, momentumy: %f\n\n", instance->ic->getSelected()->momentumX,
-                    instance->ic->getSelected()->momentumY);
+            //printf("momentumx: %f, momentumy: %f\n\n", instance->ic->getSelected()->momentumX,
+            //        instance->ic->getSelected()->momentumY);
             break;
         case 'd':
             instance->ic->removeItem(instance->ic->getSelected());
@@ -172,12 +172,12 @@ void Game::specialFunc(int key, int x, int y)
         case GLUT_KEY_DOWN:
             instance->ic->getSelected()->resize(-1);
             break;
-        case GLUT_KEY_LEFT:
-            instance->ic->getSelected()->spinMomentum -= 1;
-            break;
-        case GLUT_KEY_RIGHT:
-            instance->ic->getSelected()->spinMomentum += 1;
-            break;
+        //case GLUT_KEY_LEFT:
+        //    instance->ic->getSelected()->spinMomentum -= 1;
+        //    break;
+        //case GLUT_KEY_RIGHT:
+        //    instance->ic->getSelected()->spinMomentum += 1;
+        //    break;
         default:
             break;
     }
