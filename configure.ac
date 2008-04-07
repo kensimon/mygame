@@ -171,6 +171,11 @@ AC_DEFUN( CHECK_FOR_GLUT_LIB, [
 ])
 
 CHECK_FOR_GLUT_LIB
+
+if test "x$have_GLUT" = "xno" ; then
+    AC_MSG_ERROR([Cannot find GLUT library])
+fi
+
 LIBS="$saved_LIBS"
 
 LIBS="$LIBS $GL_LIBS $GLUT_LIBS"

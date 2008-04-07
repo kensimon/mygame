@@ -4798,6 +4798,13 @@ echo "${ECHO_T}$have_GLUT" >&6; }
         GLUT_LIBS="-lglut"
     fi
 
+
+if test "x$have_GLUT" = "xno" ; then
+    { { echo "$as_me:$LINENO: error: Cannot find GLUT library" >&5
+echo "$as_me: error: Cannot find GLUT library" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 LIBS="$saved_LIBS"
 
 LIBS="$LIBS $GL_LIBS $GLUT_LIBS"
