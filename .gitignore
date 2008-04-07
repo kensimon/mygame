@@ -16,3 +16,4 @@ config.sub
 mygame.ncb
 Debug
 Release
+build-stamp
