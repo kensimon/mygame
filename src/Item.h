@@ -42,7 +42,8 @@ class Item
         GLdouble gety();
         GLdouble getobjx();
         GLdouble getobjy();
-
+        int getSpinMomentum();
+        void rotate();
         virtual void draw();
         void drawBBox();
         GLdouble getRotation();
@@ -50,15 +51,15 @@ class Item
         Item* previous;
         GLdouble getSize();
         void setColor(GLdouble red, GLdouble green, GLdouble blue);
-
+        GLdouble momentumX;
+        GLdouble momentumY;
         GLdouble getMass();
         void setClickPos(GLdouble, GLdouble);
         void dragTo(GLdouble, GLdouble);
         BBox* getBBox();
         bool grabbed;
         virtual void updateBBox();
-
-		friend class Physics;
+        int spinMomentum;
 
     protected:
         GLdouble x;
@@ -76,12 +77,7 @@ class Item
         GLdouble mass;
         GLdouble xclickpos;
         GLdouble yclickpos;
-		GLdouble momentumX;
-        GLdouble momentumY;
-        GLdouble spinMomentum;
         BBox* bbox;
-		void rotate();
-		void dragCenterTo(GLdouble x, GLdouble y);
 };
 
 #endif

@@ -1,5 +1,4 @@
 #include "Physics.h"
-#include "Item.h"
 #include "Game.h"
 #include "Config.h"
 
@@ -20,14 +19,10 @@ void Physics::tick()
 
     while (item != NULL)
     {
-		item->spinMomentum *= VISCOCITY * 0.97;
-
-		//if (!item->grabbed)
-			item->rotate();
+        item->rotate();
 
         if (item->grabbed)
         {
-#if 0
             item->momentumX = 0;
             item->momentumY = 0;
             if (item->gety() > instance->getHeight())
@@ -38,53 +33,6 @@ void Physics::tick()
                 item->moveTo(item->getx(), 0);
             if (item->getx() < 0)
                 item->moveTo(0, item->gety());
-#else
-
-			/*
-			 * Make it rotate around an axis where the user clicked
-			 * (like a pendulum, or something.)
-			 */
-			GLdouble clickx = item->xclickpos - item->x;
-			GLdouble clicky = -(item->yclickpos - item->y);
-			GLdouble len = sqrt(pow(clickx, 2) + pow(clicky, 2));
-			GLdouble radians = (item->degrees * (2.0 * PI)) / 360.0;
-
-			GLdouble theta;
-			if (clicky >= 0 && clickx >= 0)
-				theta = atan(fabs(clicky) / fabs(clickx));
-			else if (clicky >= 0 && clickx <= 0)
-				theta = (PI / 2) + atan(fabs(clickx) / fabs(clicky));
-			else if (clicky <= 0 && clickx <= 0)
-				theta = PI + atan(fabs(clicky) / fabs(clickx));
-			else
-				theta = PI + (PI / 2) + atan(fabs(clickx) / fabs(clicky));
-
-			/* calculation done here. */
-			theta += sin(theta + (PI * 1.5)) * -(GRAVITY / len);
-			/* end calculation. */
-
-			GLdouble newx, newy = 0;
-			if (theta >= 0 && theta <= PI / 2) {
-				newx = len * cos(theta);
-				newy = len * sin(theta);
-			}
-			else if (theta >= PI / 2 && theta <= PI) {
-				newx = -(len * sin(theta - (PI / 2)));
-				newy = len * cos(theta - (PI / 2));
-			}
-			else if (theta >= PI && theta <= PI * 1.5) {
-				newx = -(len * cos(theta - PI));
-				newy = -(len * sin(theta - PI));
-			}
-			else {
-				newx = len * sin(theta - (PI * 1.5));
-				newy = -(len * cos(theta - (PI * 1.5)));
-			}
-
-			item->x = item->xclickpos - newx;
-			item->y = item->yclickpos + newy;
-#endif
-
             return;
         }
         /* Calculate new y position */

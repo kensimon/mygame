@@ -60,11 +60,6 @@ void Item::dragTo(GLdouble a, GLdouble b)
     this->updateBBox();
 }
 
-void Item::dragCenterTo(GLdouble a, GLdouble b)
-{
-
-}
-
 void Item::resize (GLdouble x)
 {
     //printf("Resizing to %lf\n", x);
