@@ -4,6 +4,7 @@
 #include "ItemCollection.h"
 #include "Config.h"
 #include <iostream>
+#include <cstdlib>
 
 Game* Game::instance = NULL;
 
@@ -64,7 +65,7 @@ void Game::timerFunc(int)
     Game::display();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
-        printf ("%s\n", error);
+        printf ("%s\n", (char*)error);
 
 	/* End timer functions here */
 #ifdef _WINDOWS_ //Lubix seems to sleep just fine without this.
