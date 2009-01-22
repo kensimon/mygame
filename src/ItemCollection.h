@@ -1,7 +1,9 @@
 #ifndef __ITEMCOLLECTION_H
 #define __ITEMCOLLECTION_H
 #include "Item.h"
+#include <list>
 
+using std::list;
 
 class ItemCollection
 {
@@ -10,7 +12,6 @@ public:
 		~ItemCollection();
 		void push(Item* i);
         Item* get(int num);
-        //Item** toArray();
 		void pop();
 		void drawAll();
 		void select(GLdouble x, GLdouble y);
@@ -18,13 +19,12 @@ public:
 		void removeItem(int num);
         int length();
 		Item* getSelected();
+		list<Item*>::iterator getBeginIterator();
+		list<Item*>::iterator getEndIterator();
 
 private:
 		Item* selected;
-		Item* head;
-		Item* tail;
-        int _length;
-
+		list<Item*> items;
 };
 
 #endif

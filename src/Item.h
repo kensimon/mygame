@@ -47,8 +47,6 @@ class Item
         virtual void draw();
         void drawBBox();
         GLdouble getRotation();
-        Item* next;
-        Item* previous;
         GLdouble getSize();
         void setColor(GLdouble red, GLdouble green, GLdouble blue);
         GLdouble momentumX;

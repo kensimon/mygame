@@ -7,7 +7,6 @@ Square::Square(int xpos, int ypos, int size)
     this->y = ypos;
     this->size = size;
     degrees = 0;
-    next = NULL;
 }
 
 Square::~Square()

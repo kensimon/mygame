@@ -8,8 +8,6 @@ Item::Item()
     degrees = 0;
     spinMomentum = 0;
     size = 0;
-    next = NULL;
-    previous = NULL;
     red = 1.0;
     green = 1.0;
     blue = 1.0;

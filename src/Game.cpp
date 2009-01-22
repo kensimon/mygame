@@ -107,11 +107,17 @@ void Game::keyboardFunc(unsigned char key, int, int)
             exit(0);
             break;
         case 'c':
-            printf("x: %f, y: %f\n", instance->ic->getSelected()->getx(), instance->ic->getSelected()->gety());
-            printf("rotation: %f\n", instance->ic->getSelected()->getRotation());
-            printf("momentumx: %f, momentumy: %f\n\n", instance->ic->getSelected()->momentumX,
-                    instance->ic->getSelected()->momentumY);
-            break;
+			{
+				if (instance->ic->getSelected() == NULL)
+				{
+					break;
+				}
+				printf("x: %f, y: %f\n", instance->ic->getSelected()->getx(), instance->ic->getSelected()->gety());
+				printf("rotation: %f\n", instance->ic->getSelected()->getRotation());
+				printf("momentumx: %f, momentumy: %f\n\n", instance->ic->getSelected()->momentumX,
+						instance->ic->getSelected()->momentumY);
+				break;
+			}
         case 'd':
             instance->ic->removeItem(instance->ic->getSelected());
             break;
@@ -191,12 +197,19 @@ void Game::mouse(int button, int state, int x, int y)
             if (state == GLUT_DOWN)
             {
                 instance->ic->select((GLdouble)x, (GLdouble)y);
-                instance->ic->getSelected()->setClickPos((GLdouble)x, (GLdouble)y);
-                instance->ic->getSelected()->grabbed = true;
+				Item* selected = instance->ic->getSelected();
+				if (selected != NULL)
+				{
+					instance->ic->getSelected()->setClickPos((GLdouble)x, (GLdouble)y);
+					instance->ic->getSelected()->grabbed = true;
+				}
             }
             if (state == GLUT_UP)
             {
-                instance->ic->getSelected()->grabbed = false;
+				if (instance->ic->getSelected() != NULL)
+				{
+					instance->ic->getSelected()->grabbed = false;
+				}
             }
             break;
         case GLUT_RIGHT_BUTTON:
@@ -218,7 +231,7 @@ void Game::mouse(int button, int state, int x, int y)
 
 void Game::dragMouse(int x, int y)
 {
-        if (instance->curbutton == GLUT_LEFT_BUTTON)
+        if (instance->curbutton == GLUT_LEFT_BUTTON && instance->ic->getSelected() != NULL)
         {
             instance->ic->getSelected()->dragTo(x, y);
         }

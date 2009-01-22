@@ -3,17 +3,9 @@
 #include "Game.h"
 #include <iostream>
 
-/*
- * ItemCollection is a double-linked list of Item objects.
- */
 ItemCollection::ItemCollection()
 {
-    head = new Item();
-    selected = head;
-    head->next = NULL;
-    head->previous = NULL;
-    tail = head;
-    _length = 0;
+	selected = NULL;
 }
 
 
@@ -24,120 +16,66 @@ ItemCollection::~ItemCollection()
 
 void ItemCollection::push(Item* n)
 {
-    Item* cur = head;
-
-    while (cur->next != NULL)
-    {
-        cur = cur->next;
-    }
-    cur->next = n;
-    n->previous = cur;
-    tail = n;
-    _length++;
+	items.push_back(n);
 }
 
 Item* ItemCollection::get(int num)
 {
-    Item* cur = head->next;
     int i = 0;
-
-    while (cur != NULL)
-    {
-        if (i == num)
-            return cur;
-        i++;
-        cur = cur->next;
-    }
-
+	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	{
+		if (i++ == num)
+		{
+			return *pos;
+		}
+	}
     return NULL;
 }
 
 void ItemCollection::removeItem(Item* i)
 {
-    Item* cur = head;
+	if (i == NULL)
+		return;
 
-    while (cur != NULL)
-    {
-        if (cur == i)
-        {
-            if (cur->previous != NULL)
-            {
-                cur->previous->next = cur->next;
-                if (cur->next != NULL)
-                    cur->next->previous = cur->previous;
-
-                if (cur == tail)
-                    tail = cur->previous;
-
-                delete cur;
-                _length--;
-				/* If we just deleted selected, make sure to reset what selected is (head) */
-				if (cur == selected)
-					selected = head;
-                return;
-            }
-            //else they're trying to delete head, which we won't allow.
-        }
-        cur = cur->next;
-    }
+	items.remove(i);
+	delete i;
+	if (selected == i)
+	{
+		selected = NULL;
+	}
 }
 
 void ItemCollection::removeItem(int num)
 {
-    Item* cur = head->next;
-    int i = 0;
-
-    while (cur != NULL)
-    {
-        if (i == num)
-        {
-            if (cur->previous != NULL)
-            {
-                cur->previous->next = cur->next;
-                if (cur->next != NULL)
-                    cur->next->previous = cur->previous;
-
-                if (cur == tail)
-                    tail = cur->previous;
-
-				if (cur == selected)
-					selected = head;
-                delete cur;
-                _length--;
-                return;
-            }
-            //else they're trying to delete head, which we won't allow.
-        }
-        cur = cur->next;
-        i++;
-    }
+	Item* toDelete = get(num);
+	removeItem(toDelete);
 }
 
 void ItemCollection::pop()
 {
-    if (tail->previous != NULL)
-    {
-		if (tail == selected)
-			selected = head;
-        tail = tail->previous;
-        delete tail->next;
-        tail->next = NULL;
-        _length++;
-    }
+	if (items.size() == 0)
+		return;
+
+	Item* toDelete = items.back();
+	items.pop_back();
+	delete toDelete;
+
+	if (selected == toDelete)
+	{
+		selected = NULL;
+	}
 }
 
 void ItemCollection::drawAll()
 {
     bool dbb = Game::getInstance()->drawBBoxes;
-    Item* cur = head;
-    while (cur != NULL)
-    {
-        if (dbb) {
-            cur->drawBBox();
-        }
-        cur->draw();
-        cur = cur->next;
-    }
+	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	{
+		if (dbb) {
+			(*pos)->drawBBox();
+		}
+		(*pos)->draw();
+	}
 }
 
 void ItemCollection::select(GLdouble x, GLdouble y)
@@ -153,55 +91,56 @@ void ItemCollection::select(GLdouble x, GLdouble y)
     //(x and y are translated here.)
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &x, &y, &objz);
 
-    Item* cur = tail;
+    Item* cur;
     bool done = false;
-    while (cur != NULL && !done)
-    {
-        done = true;
+	
+	/* start from the end and work our way back to the beginning to find the 
+	 * object.  We do this because the end has the elements that were drawn 
+	 * last, and we want to select the item that the user is seeing, not the one
+	 * that's drawn underneath.
+	 */
+	for (list<Item*>::reverse_iterator pos = items.rbegin(); pos != items.rend() && !done; ++pos)
+	{
+		done = true;
+		cur = *(pos);
 
-        /* Is this what we tried to click on? */
+        // Is this what we tried to click on?
         if (x <= (cur->getobjx() + cur->getSize()) &&
                 x >= (cur->getobjx() - cur->getSize()) &&
                 y <= (cur->getobjy() + cur->getSize()) &&
                 y >= (cur->getobjy() - cur->getSize()))
         {
-            selected->setColor(1,1,1);
+			if (selected != NULL) //de-color the previously selected item 
+			{
+				selected->setColor(1,1,1);
+			}
             selected = cur;
         }
         else
         {
-            /* Nope, try the next one. */
+            // Nope, try the next one.
             done = false;
-            cur = cur->previous;
+			cur = NULL; //In case this is the last one.
         }
     }
-    /* If we haven't found one yet... */
+
+    // If we haven't found one yet...
     if (cur == NULL)
     {
-        /* Select nothing. */
-		if (selected != head)
+        // Select nothing.
+		if (selected != NULL)
 			selected->setColor(1,1,1);
-        selected = head;
-        cur = head;
+        selected = NULL;
     }
 
-    /* 
-     * Now we set the selected one as the topmost one,
-     * so long as it's not head.
-     */
-    if (cur->next != NULL && cur != head)
+	//Move selected to the back, so it gets rendered on top.
+	if (selected != NULL)
     {
-        Item *tmp = cur;
-        if (tmp->previous != NULL)
-            tmp->previous->next = tmp->next;
-        tmp->next->previous = tmp->previous;
-        tail->next = tmp;
-        tmp->previous = tail;
-        tmp->next = NULL;
-        tail = tmp;
+		items.remove(selected);
+		items.push_back(selected);
     }
 
-    if (selected != head)
+    if (selected != NULL)
         selected->setColor( .8, 0, 0);
 }
 
@@ -212,5 +151,15 @@ Item* ItemCollection::getSelected()
 
 int ItemCollection::length()
 {
-    return _length;
+	return items.size();
+}
+
+list<Item*>::iterator ItemCollection::getBeginIterator()
+{
+	return items.begin();
+}
+
+list<Item*>::iterator ItemCollection::getEndIterator()
+{
+	return items.end();
 }

@@ -17,8 +17,14 @@ void Physics::tick()
     Item* item = ic->get(0);
     Game* instance = Game::getInstance();
 
-    while (item != NULL)
+	list<Item*>::iterator pos;
+	/* 
+	 * Not thread safe!  If the contents of the list change while this loop is
+	 * running, Bad Things will happen.
+	 */
+	for (pos = ic->getBeginIterator(); pos != ic->getEndIterator(); ++pos)
     {
+		item = *pos;
         item->rotate();
 
         if (item->grabbed)
@@ -118,8 +124,5 @@ void Physics::tick()
         if (gravityOn && fabs(item->gety()) >= instance->getHeight() - GRAVITY &&
                 item->momentumY == 0)
             item->momentumX *= ELASTICITY;
-
-
-        item = item->next;
     }
 }
