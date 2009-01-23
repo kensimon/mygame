@@ -1,8 +1,13 @@
 #include "Item.h"
+#include "Game.h"
 #include <iostream>
 
 Item::Item()
+: thread_stoprequested(false),
+thread_go(false),
+tick_thread(boost::bind(&Item::tick, this))
 {
+	instance = Game::getInstance();
     x = 0;
     y = 0;
     degrees = 0;
@@ -28,13 +33,22 @@ Item::Item()
     yclickpos = 0;
 
     bbox = new BBox(0, 0, 0, 0);
-
     grabbed = false;
+	thread_go = true;
 }
 
 Item::~Item()
 {
     delete bbox;
+	//TODO: Should I have to do this?
+	thread_stoprequested = true;
+	boost::posix_time::time_duration delay(0, 0, 1, 0);
+	tick_thread.timed_join(delay);
+	if (tick_thread.joinable())
+	{
+		std::cout << "Interrupting thread!" << std::endl;
+		tick_thread.interrupt();
+	}
 }
 
 void Item::moveTo(GLdouble x, GLdouble y)
@@ -165,4 +179,116 @@ BBox* Item::getBBox()
 
 void Item::updateBBox()
 {
+}
+
+void Item::tickonce()
+{
+	tick_mutex.unlock();
+}
+
+void Item::tick()
+{
+	while (!thread_stoprequested)
+	{
+		tick_mutex.lock();
+        rotate();
+
+        if (grabbed)
+        {
+            momentumX = 0;
+            momentumY = 0;
+            if (gety() > instance->getHeight())
+                moveTo(getx(), instance->getHeight());
+            if (getx() > instance->getWidth())
+                moveTo(instance->getWidth(), gety());
+            if (gety() < 0)
+                moveTo(getx(), 0);
+            if (getx() < 0)
+                moveTo(0, gety());
+            return;
+        }
+        /* Calculate new y position */
+        /* Gravity adds to velocity */
+        if (instance->gravityOn && ((gety() < instance->getHeight()) || (momentumY != 0)))
+        {
+            momentumY += GRAVITY;
+        }
+
+
+        /* Move vertically based on velocity */
+        momentumY *= VISCOCITY;
+        moveTo(getx(), gety() + momentumY);
+
+        if (gety() >= instance->getHeight())
+        {
+            /* item hit floor -- bounce off floor */
+
+            /* Reverse ball velocity */
+            momentumY = -momentumY;
+
+            moveTo(getx(), gety() + momentumY);
+
+            if (instance->gravityOn && fabs(momentumY) < GRAVITY)
+                /* This helps dampen rounding errors that cause balls to
+                   bounce forever */
+                momentumY = 0;
+            else
+            {
+                /* Ball velocity is reduced by the percentage elasticity */
+                momentumY *= ELASTICITY;
+                moveTo(getx(), instance->getHeight() -
+                        (instance->getHeight() - gety()) * ELASTICITY);
+            }
+        }
+        else
+            if (gety() < 0)
+            {
+                /* Reverse ball velocity */
+                momentumY = -momentumY;
+
+                /* Ball velocity is reduced by the percentage elasticity */
+                momentumY *= ELASTICITY;
+
+                /* Bounce off the wall */
+                moveTo(getx(), -gety());
+            }
+
+
+        /* Calculate new x position */
+        /* Move horizontally based on velocity */
+        momentumX *= VISCOCITY;
+        moveTo(getx() + momentumX, gety());
+
+        if (getx() > instance->getWidth())
+        {
+            /* Hit right wall */
+            /* Reverse ball velocity */
+            momentumX = -momentumX;
+
+            /* Ball velocity is reduced by the percentage elasticity */
+            momentumX *= ELASTICITY;
+
+            /* Bounce off the wall */
+            moveTo(-getx() + instance->getWidth() * 2, gety());
+        }
+        else if (getx() < 0)
+        {
+            /* Hit left wall */
+            /* Reverse ball velocity */
+            momentumX = -momentumX;
+
+            /* Ball velocity is reduced by the percentage elasticity */
+            momentumX *= ELASTICITY;
+
+            /* Bounce off the wall */
+            moveTo(-getx(), gety());
+        }
+
+
+        /* Slow ball if it is rolling on the floor */
+
+        if (instance->gravityOn && fabs(gety()) >= instance->getHeight() - GRAVITY &&
+                momentumY == 0)
+            momentumX *= ELASTICITY;
+	}
 }

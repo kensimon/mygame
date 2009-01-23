@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;include&quot;"
+				AdditionalIncludeDirectories="include;&quot;C:\Program Files\boost\boost_1_36_0&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;FREEGLUT_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,8 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
-				AdditionalDependencies="&quot;$(InputDir)\lib\freeglut_static.lib&quot;"
+				AdditionalDependencies="&quot;$(ProjectDir)\lib\freeglut_static.lib&quot; &quot;$(ProjectDir)\lib\libboost_thread-vc90-mt-gd-1_36.lib&quot; &quot;$(ProjectDir)\lib\libboost_date_time-vc90-mt-gd-1_36.lib&quot;"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				GenerateManifest="true"
@@ -95,6 +94,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-gd-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-gd-1_36.dll&quot; &quot;$(TargetDir)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -122,12 +122,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="include;&quot;C:\Program Files\boost\boost_1_36_0&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;FREEGLUT_STATIC"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -141,6 +141,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+				AdditionalDependencies="&quot;$(ProjectDir)\lib\freeglut_static.lib&quot; &quot;$(ProjectDir)\lib\libboost_thread-vc90-mt-1_36.lib&quot; &quot;$(ProjectDir)\lib\libboost_date_time-vc90-mt-1_36.lib&quot;"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;lib&quot;"
 				GenerateDebugInformation="true"
@@ -171,6 +173,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -203,10 +206,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Physics.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Square.cpp"
 				>
 			</File>
@@ -234,10 +233,6 @@
 			</File>
 			<File
 				RelativePath=".\src\ItemCollection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Physics.h"
 				>
 			</File>
 			<File
