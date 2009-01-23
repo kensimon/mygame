@@ -10,7 +10,7 @@
 Game* Game::instance = NULL;
 
 Game::Game() :
-read_mutex()
+read_mutex(), stdout_mutex()
 {
     ic = new ItemCollection();
     drawBBoxes = false;
@@ -64,7 +64,7 @@ void Game::timerFunc(int)
 	/* Start timer functions here */
 	for (std::list<Item*>::iterator pos = instance->ic->getBeginIterator(); pos != instance->ic->getEndIterator(); ++pos)
 	{
-		(*pos)->tickonce();
+		(*pos)->tick();
 	}
     Game::display();
     GLenum error = glGetError();

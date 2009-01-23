@@ -18,6 +18,7 @@ class Game
         int getHeight();
         int getWidth();
 		bool gravityOn;
+		mutex stdout_mutex;
 
     private:
         static void display();

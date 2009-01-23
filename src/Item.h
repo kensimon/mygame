@@ -69,8 +69,7 @@ class Item
         virtual void updateBBox();
         int spinMomentum;
 		bool thread_stoprequested;
-		bool thread_go;
-		void tickonce();
+		void tick();
 
     protected:
         GLdouble x;
@@ -90,9 +89,10 @@ class Item
         GLdouble yclickpos;
         BBox* bbox;
 		mutex tick_mutex;
-		void tick();
+		void work();
 		thread tick_thread;
 		Game* instance;
+		boost::condition_variable wait_variable;
 };
 
 #endif
