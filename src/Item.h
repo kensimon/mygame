@@ -93,7 +93,6 @@ class Item
 		void work();
 		thread tick_thread;
 		Game* instance;
-		bool calculating;
 };
 
 #endif

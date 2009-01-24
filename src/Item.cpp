@@ -4,7 +4,6 @@
 
 Item::Item()
 : thread_stoprequested(false),
-calculating(false),
 tick_thread(boost::bind(&Item::work, this))
 {
 	instance = Game::getInstance();
@@ -39,7 +38,6 @@ tick_thread(boost::bind(&Item::work, this))
 Item::~Item()
 {
 	thread_stoprequested = true;
-	calculating = true;
 	wait_variable.notify_all();
 	tick_thread.join();
     delete bbox;
@@ -54,6 +52,10 @@ void Item::moveTo(GLdouble x, GLdouble y)
 
 void Item::dragTo(GLdouble a, GLdouble b)
 {
+	if (thread_stoprequested)
+	{
+		return;
+	}
 	mutex::scoped_lock lock(tick_mutex);
     x += a - xclickpos;
     y += b - yclickpos;
@@ -177,7 +179,6 @@ void Item::updateBBox()
 
 void Item::tick()
 {
-	calculating = true;
 	wait_variable.notify_all();
 }
 
@@ -186,10 +187,7 @@ void Item::work()
 	while (!thread_stoprequested)
 	{
 		mutex::scoped_lock lock(tick_mutex);
-		while (!calculating)
-		{
-			wait_variable.wait(lock);
-		}
+		wait_variable.wait(lock);
 		rotate();
 
 		if (grabbed)
@@ -204,8 +202,6 @@ void Item::work()
 				moveTo(getx(), 0);
 			if (getx() < 0)
 				moveTo(0, gety());
-			calculating = false;
-			wait_variable.notify_all();
 			continue;
 		}
 		/* Calculate new y position */
@@ -291,7 +287,5 @@ void Item::work()
 		if (instance->getGravityOn() && fabs(gety()) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
 			momentumX *= ELASTICITY;
-		calculating = false;
-		wait_variable.notify_all();
 	}
 }
