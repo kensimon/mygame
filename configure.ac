@@ -96,7 +96,7 @@ if test "x$have_boost_thread_hpp" = "xno"; then
     AC_MSG_ERROR([Cannot find boost/thread.hpp])
 fi
 
-CPPFLAGS="$saved_CPPFLAGS"
+CPPFLAGS="$saved_CPPFLAGS $GL_CPPFLAGS $GLUT_CPPFLAGS $BOOST_CPPFLAGS"
 
 dnl ===================
 dnl Check for GL library
@@ -182,7 +182,7 @@ LIBS="$saved_LIBS"
 dnl ===================
 dnl Check for GLUT toolkit
 dnl ===================
-AC_ARG_WITH(glut-libs,	[	--with-glut-libs=DIR	GLUT toolkit location])
+AC_ARG_WITH(glut-libs,	[  --with-glut-libs=DIR	GLUT toolkit location])
 
 if test "x$with_glut_libs" = "x" ; then
     GLUT_LDOPTS=""
@@ -213,10 +213,42 @@ fi
 LIBS="$saved_LIBS"
 
 dnl ===================
+dnl Check for pthread
+dnl ===================
+
+AC_ARG_WITH(pthread-libs,	[  --with-pthread-libs=DIR	pthread library location])
+
+if test "x$with_pthread_libs" = "x" ; then
+    PTHREAD_LDOPTS=""
+else
+    PTHREAD_LDOPTS="-L$with_pthread_libs"
+fi
+
+saved_LIBS="$LIBS"
+PTHREAD_LIBS=""
+
+AC_DEFUN( CHECK_FOR_PTHREAD_LIB, [
+    AC_MSG_CHECKING([for libpthread])
+    LIBS="$LIBS $PTHREAD_LDOPTS -lpthread"
+    AC_TRY_LINK( , , have_PTHREAD=yes, have_PTHREAD=no)
+    AC_MSG_RESULT([$have_PTHREAD])
+
+    if test "x$have_PTHREAD" = "xyes" ; then
+        PTHREAD_LIBS="$PTHREAD_LDOPTS -lpthread"
+    fi
+])
+
+CHECK_FOR_PTHREAD_LIB
+
+if test "x$have_PTHREAD" = "xno" ; then
+    AC_MSG_ERROR([Cannot find libpthread])
+fi
+
+dnl ===================
 dnl Check for Boost
 dnl ===================
 
-AC_ARG_WITH(boost-libs,	[	--with-boost-libs=DIR	Boost libraries location])
+AC_ARG_WITH(boost-libs,	[  --with-boost-libs=DIR	Boost libraries location])
 
 if test "x$with_boost_libs" = "x" ; then
     BOOST_LDOPTS=""
@@ -229,12 +261,12 @@ BOOST_LIBS=""
 
 AC_DEFUN( CHECK_FOR_BOOST_LIB, [
     AC_MSG_CHECKING([for Boost library])
-    LIBS="$LIBS -lboost_thread-mt -lboost_date_time-mt"
+    LIBS="$LIBS $BOOST_LDOPTS -lboost_thread-mt"
     AC_TRY_LINK( , , have_BOOST=yes, have_BOOST=no)
     AC_MSG_RESULT([$have_BOOST])
 
     if test "x$have_BOOST" = "xyes" ; then
-        BOOST_LIBS="-lboost_thread-mt -lboost_date_time-mt"
+        BOOST_LIBS="$BOOST_LDOPTS -lboost_thread-mt"
     fi
 ])
 
@@ -246,6 +278,6 @@ fi
 
 LIBS="$saved_LIBS"
 
-LIBS="$LIBS $GL_LIBS $GLUT_LIBS $BOOST_LIBS"
+LIBS="$LIBS $GL_LIBS $GLUT_LIBS $BOOST_LIBS $PTHREAD_LIBS"
 
 AC_OUTPUT([Makefile src/Makefile])
