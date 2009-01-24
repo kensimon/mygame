@@ -65,15 +65,12 @@ class Item
         GLdouble getMass();
         void setClickPos(GLdouble, GLdouble);
         void dragTo(GLdouble, GLdouble);
-        BBox* getBBox();
         bool grabbed;
-        virtual void updateBBox();
         int spinMomentum;
-		bool thread_stoprequested;
 		void tick();
-		boost::condition_variable wait_variable;
 
     protected:
+        virtual void updateBBox();
         GLdouble x;
         GLdouble y;
         GLdouble objx;
@@ -89,7 +86,11 @@ class Item
         GLdouble mass;
         GLdouble xclickpos;
         GLdouble yclickpos;
-        BBox* bbox;
+		GLdouble elasticity;
+		GLdouble floor_friction;
+		boost::condition_variable wait_variable;
+        BBox bbox;
+		bool thread_stoprequested;
 		boost::mutex tick_mutex;
 		void work();
 		thread tick_thread;

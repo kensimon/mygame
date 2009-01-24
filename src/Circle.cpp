@@ -13,6 +13,8 @@ Circle::Circle(int xpos, int ypos, int size)
     objsizey = 0;
     objsizez = 0;
     quad = gluNewQuadric();
+	floor_friction = 0.99;
+	elasticity = 0.9;
 }
 
 Circle::~Circle()
@@ -46,8 +48,8 @@ void Circle::draw()
 
 void Circle::updateBBox()
 {
-    bbox->min[0] = x - size;
-    bbox->min[1] = y + size;
-    bbox->max[0] = x + size;
-    bbox->max[1] = y - size;
+    bbox.min[0] = x - size;
+    bbox.min[1] = y + size;
+    bbox.max[0] = x + size;
+    bbox.max[1] = y - size;
 }

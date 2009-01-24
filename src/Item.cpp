@@ -4,7 +4,10 @@
 
 Item::Item()
 : thread_stoprequested(false),
-tick_thread(boost::bind(&Item::work, this))
+tick_thread(boost::bind(&Item::work, this)),
+elasticity(.9),
+floor_friction(.99),
+bbox(0,0,0,0)
 {
 	instance = Game::getInstance();
     x = 0;
@@ -31,7 +34,6 @@ tick_thread(boost::bind(&Item::work, this))
     xclickpos = 0;
     yclickpos = 0;
 
-    bbox = new BBox(0, 0, 0, 0);
     grabbed = false;
 }
 
@@ -40,14 +42,13 @@ Item::~Item()
 	thread_stoprequested = true;
 	wait_variable.notify_all();
 	tick_thread.join();
-    delete bbox;
 }
 
-void Item::moveTo(GLdouble x, GLdouble y)
+void Item::moveTo(GLdouble xloc, GLdouble yloc)
 {
-    this->x = x;
-    this->y = y;
-    this->updateBBox();
+    x = xloc;
+    y = yloc;
+    updateBBox();
 }
 
 void Item::dragTo(GLdouble a, GLdouble b)
@@ -56,7 +57,7 @@ void Item::dragTo(GLdouble a, GLdouble b)
 	{
 		return;
 	}
-	mutex::scoped_lock lock(tick_mutex);
+	//mutex::scoped_lock lock(tick_mutex);
     x += a - xclickpos;
     y += b - yclickpos;
 
@@ -65,15 +66,14 @@ void Item::dragTo(GLdouble a, GLdouble b)
 
     xclickpos = a;
     yclickpos = b;
-	tick_thread.detach();
-    this->updateBBox();
+    updateBBox();
 }
 
 void Item::resize (GLdouble x)
 {
     //printf("Resizing to %lf\n", x);
     size += x;
-    this->updateBBox();
+    updateBBox();
 }
 
 void Item::setMass(GLdouble newMass)
@@ -111,11 +111,9 @@ void Item::drawBBox()
 
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
 
-    /* Move the square to where it belongs */
     glTranslated(objx, -objy, objz);
     glColor4d(red, green, blue, 0.3);
-    glRectd(bbox->min[0] - x, bbox->min[1] - y, bbox->max[0] - x, bbox->max[1] - y);
-    //glRectd(10,-10, -10, 10);
+    glRectd(bbox.min[0] - x, bbox.min[1] - y, bbox.max[0] - x, bbox.max[1] - y);
     glPopMatrix();
 } 
 
@@ -127,7 +125,7 @@ void Item::rotate()
     else if (degrees < -360.0)
         degrees += 360.0;
 
-    this->updateBBox();
+    updateBBox();
 }
 
 GLdouble Item::getRotation()
@@ -168,11 +166,6 @@ void Item::setClickPos(GLdouble x, GLdouble y)
     yclickpos = y;
 }
 
-BBox* Item::getBBox()
-{
-    return bbox;
-}
-
 void Item::updateBBox()
 {
 }
@@ -188,6 +181,11 @@ void Item::work()
 	{
 		mutex::scoped_lock lock(tick_mutex);
 		wait_variable.wait(lock);
+		if (thread_stoprequested) //the destructor also calls notify_all(), so if we're being destructed, quit now.
+		{
+			return;
+		}
+
 		rotate();
 
 		if (grabbed)
@@ -202,7 +200,7 @@ void Item::work()
 				moveTo(getx(), 0);
 			if (getx() < 0)
 				moveTo(0, gety());
-			continue;
+			continue; //nothing more to do if we're being grabbed.
 		}
 		/* Calculate new y position */
 		/* Gravity adds to velocity */
@@ -216,7 +214,7 @@ void Item::work()
 		momentumY *= VISCOCITY;
 		moveTo(getx(), gety() + momentumY);
 
-		if (gety() >= instance->getHeight())
+		if (bbox.min[1] >= instance->getHeight())
 		{
 			/* item hit floor -- bounce off floor */
 
@@ -232,23 +230,24 @@ void Item::work()
 			else
 			{
 				/* Ball velocity is reduced by the percentage elasticity */
-				momentumY *= ELASTICITY;
+				momentumY *= elasticity;
+				momentumX *= floor_friction;
 				moveTo(getx(), instance->getHeight() -
-						(instance->getHeight() - gety()) * ELASTICITY);
+						(instance->getHeight() - gety()) * elasticity);
 			}
 		}
 		else
-			if (gety() < 0)
-			{
-				/* Reverse ball velocity */
-				momentumY = -momentumY;
+		if (bbox.max[1] < 0)
+		{
+			/* Reverse ball velocity */
+			momentumY = -momentumY;
 
-				/* Ball velocity is reduced by the percentage elasticity */
-				momentumY *= ELASTICITY;
+			/* Ball velocity is reduced by the percentage elasticity */
+			momentumY *= elasticity;
 
-				/* Bounce off the wall */
-				moveTo(getx(), -gety());
-			}
+			/* Bounce off the wall */
+			moveTo(getx(), -gety());
+		}
 
 
 		/* Calculate new x position */
@@ -256,26 +255,27 @@ void Item::work()
 		momentumX *= VISCOCITY;
 		moveTo(getx() + momentumX, gety());
 
-		if (getx() > instance->getWidth())
+		if (bbox.min[0] > instance->getWidth())
 		{
 			/* Hit right wall */
 			/* Reverse ball velocity */
 			momentumX = -momentumX;
 
 			/* Ball velocity is reduced by the percentage elasticity */
-			momentumX *= ELASTICITY;
+			momentumX *= elasticity;
+			momentumY *= floor_friction;
 
 			/* Bounce off the wall */
 			moveTo(-getx() + instance->getWidth() * 2, gety());
 		}
-		else if (getx() < 0)
+		else if (bbox.max[0] < 0)
 		{
 			/* Hit left wall */
 			/* Reverse ball velocity */
 			momentumX = -momentumX;
 
 			/* Ball velocity is reduced by the percentage elasticity */
-			momentumX *= ELASTICITY;
+			momentumX *= elasticity;
 
 			/* Bounce off the wall */
 			moveTo(-getx(), gety());
@@ -286,6 +286,6 @@ void Item::work()
 
 		if (instance->getGravityOn() && fabs(gety()) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
-			momentumX *= ELASTICITY;
+				momentumX *= floor_friction;
 	}
 }

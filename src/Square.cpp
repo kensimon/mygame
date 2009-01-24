@@ -7,6 +7,8 @@ Square::Square(int xpos, int ypos, int size)
     this->y = ypos;
     this->size = size;
     degrees = 0;
+	floor_friction = 0.75;
+	elasticity = 0.75;
 }
 
 Square::~Square()
@@ -49,8 +51,8 @@ void Square::updateBBox()
     h = csize * sin(theta);
 
     w = h = max(w,h);
-    bbox->min[0] = x - w;
-    bbox->min[1] = y - h;
-    bbox->max[0] = x + w;
-    bbox->max[1] = y + h;
+    bbox.min[0] = x - w;
+    bbox.min[1] = y - h;
+    bbox.max[0] = x + w;
+    bbox.max[1] = y + h;
 }
