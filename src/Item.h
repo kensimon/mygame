@@ -70,6 +70,7 @@ class Item
         int spinMomentum;
 		bool thread_stoprequested;
 		void tick();
+		boost::condition_variable wait_variable;
 
     protected:
         GLdouble x;
@@ -88,11 +89,11 @@ class Item
         GLdouble xclickpos;
         GLdouble yclickpos;
         BBox* bbox;
-		mutex tick_mutex;
+		boost::mutex tick_mutex;
 		void work();
 		thread tick_thread;
 		Game* instance;
-		boost::condition_variable wait_variable;
+		bool calculating;
 };
 
 #endif

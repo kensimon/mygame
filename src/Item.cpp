@@ -4,6 +4,7 @@
 
 Item::Item()
 : thread_stoprequested(false),
+calculating(false),
 tick_thread(boost::bind(&Item::work, this))
 {
 	instance = Game::getInstance();
@@ -38,6 +39,8 @@ tick_thread(boost::bind(&Item::work, this))
 Item::~Item()
 {
 	thread_stoprequested = true;
+	calculating = true;
+	wait_variable.notify_all();
 	tick_thread.join();
     delete bbox;
 }
@@ -47,12 +50,11 @@ void Item::moveTo(GLdouble x, GLdouble y)
     this->x = x;
     this->y = y;
     this->updateBBox();
-    //printf("I moved to %lf, %lf\n", x, y);
 }
 
 void Item::dragTo(GLdouble a, GLdouble b)
 {
-	mutex::scoped_lock(tick_mutex);
+	mutex::scoped_lock lock(tick_mutex);
     x += a - xclickpos;
     y += b - yclickpos;
 
@@ -61,6 +63,7 @@ void Item::dragTo(GLdouble a, GLdouble b)
 
     xclickpos = a;
     yclickpos = b;
+	tick_thread.detach();
     this->updateBBox();
 }
 
@@ -123,7 +126,6 @@ void Item::rotate()
         degrees += 360.0;
 
     this->updateBBox();
-    //glutPostRedisplay();
 }
 
 GLdouble Item::getRotation()
@@ -175,15 +177,19 @@ void Item::updateBBox()
 
 void Item::tick()
 {
-	wait_variable.notify_one();
+	calculating = true;
+	wait_variable.notify_all();
 }
 
 void Item::work()
 {
 	while (!thread_stoprequested)
 	{
-		boost::mutex::scoped_lock lock(tick_mutex);
-		wait_variable.wait(lock);
+		mutex::scoped_lock lock(tick_mutex);
+		while (!calculating)
+		{
+			wait_variable.wait(lock);
+		}
 		rotate();
 
 		if (grabbed)
@@ -198,11 +204,13 @@ void Item::work()
 				moveTo(getx(), 0);
 			if (getx() < 0)
 				moveTo(0, gety());
-			return;
+			calculating = false;
+			wait_variable.notify_all();
+			continue;
 		}
 		/* Calculate new y position */
 		/* Gravity adds to velocity */
-		if (instance->gravityOn && ((gety() < instance->getHeight()) || (momentumY != 0)))
+		if (instance->getGravityOn() && ((gety() < instance->getHeight()) || (momentumY != 0)))
 		{
 			momentumY += GRAVITY;
 		}
@@ -221,7 +229,7 @@ void Item::work()
 
 			moveTo(getx(), gety() + momentumY);
 
-			if (instance->gravityOn && fabs(momentumY) < GRAVITY)
+			if (instance->getGravityOn() && fabs(momentumY) < GRAVITY)
 				/* This helps dampen rounding errors that cause balls to
 				   bounce forever */
 				momentumY = 0;
@@ -280,8 +288,10 @@ void Item::work()
 
 		/* Slow ball if it is rolling on the floor */
 
-		if (instance->gravityOn && fabs(gety()) >= instance->getHeight() - GRAVITY &&
+		if (instance->getGravityOn() && fabs(gety()) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
 			momentumX *= ELASTICITY;
+		calculating = false;
+		wait_variable.notify_all();
 	}
 }

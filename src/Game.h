@@ -17,7 +17,7 @@ class Game
         ItemCollection* getItemCollection();
         int getHeight();
         int getWidth();
-		bool gravityOn;
+		bool getGravityOn();
 		mutex stdout_mutex;
 
     private:
@@ -35,6 +35,7 @@ class Game
         int width;
         int height;
 		mutex read_mutex;
+		bool gravityOn;
 
 
     protected:

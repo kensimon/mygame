@@ -236,10 +236,10 @@ void Game::mouse(int button, int state, int x, int y)
 
 void Game::dragMouse(int x, int y)
 {
-        if (instance->curbutton == GLUT_LEFT_BUTTON && instance->ic->getSelected() != NULL)
-        {
-            instance->ic->getSelected()->dragTo(x, y);
-        }
+	if (instance->curbutton == GLUT_LEFT_BUTTON && instance->ic->getSelected() != NULL)
+	{
+		instance->ic->getSelected()->dragTo(x, y);
+	}
 }
 
 ItemCollection* Game::getItemCollection()
@@ -249,12 +249,18 @@ ItemCollection* Game::getItemCollection()
 
 int Game::getWidth()
 {
-	mutex::scoped_lock(read_mutex);
+	mutex::scoped_lock lock(read_mutex);
     return width;
 }
 
 int Game::getHeight()
 {
-	mutex::scoped_lock(read_mutex);
+	mutex::scoped_lock lock(read_mutex);
     return height;
+}
+
+bool Game::getGravityOn()
+{
+	mutex::scoped_lock lock(read_mutex);
+	return gravityOn;
 }
