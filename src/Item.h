@@ -5,6 +5,7 @@
 #include <GL/glut.h>
 #include <cmath>
 #include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
 #include "Config.h"
 
