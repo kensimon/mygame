@@ -3,7 +3,9 @@
 #include <GL/glut.h>
 #include <iostream>
 #include "ItemCollection.h"
-#include "Physics.h"
+#include <boost/thread.hpp>
+
+using boost::mutex;
 
 class Game
 {
@@ -13,9 +15,10 @@ class Game
         int init(int, char**);
         bool drawBBoxes;
         ItemCollection* getItemCollection();
-        Physics* getPhysicsEngine();
         int getHeight();
         int getWidth();
+		bool getGravityOn();
+		mutex stdout_mutex;
 
     private:
         static void display();
@@ -29,9 +32,11 @@ class Game
         int curbutton;
         int framewait;
         ItemCollection* ic;
-        Physics* phys;
         int width;
         int height;
+		mutex read_mutex;
+		bool gravityOn;
+
 
     protected:
         Game();

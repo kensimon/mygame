@@ -1,8 +1,14 @@
+#pragma once
 #ifndef __ITEM_H
 #define __ITEM_H
 
 #include <GL/glut.h>
-#include <math.h>
+#include <cmath>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
+#include "Config.h"
+
 #define PI 3.1415926535
 
 #ifndef min
@@ -12,6 +18,11 @@
 #ifndef max
 #define max(x,y) (((x) > (y)) ? (x) : (y))
 #endif
+
+using boost::thread;
+using boost::mutex;
+
+class Game;
 
 class BBox
 {
@@ -54,12 +65,12 @@ class Item
         GLdouble getMass();
         void setClickPos(GLdouble, GLdouble);
         void dragTo(GLdouble, GLdouble);
-        BBox* getBBox();
         bool grabbed;
-        virtual void updateBBox();
         int spinMomentum;
+		void tick();
 
     protected:
+        virtual void updateBBox();
         GLdouble x;
         GLdouble y;
         GLdouble objx;
@@ -75,7 +86,15 @@ class Item
         GLdouble mass;
         GLdouble xclickpos;
         GLdouble yclickpos;
-        BBox* bbox;
+		GLdouble elasticity;
+		GLdouble floor_friction;
+		boost::condition_variable wait_variable;
+        BBox bbox;
+		bool thread_stoprequested;
+		boost::mutex tick_mutex;
+		void work();
+		thread tick_thread;
+		Game* instance;
 };
 
 #endif

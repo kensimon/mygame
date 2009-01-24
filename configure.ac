@@ -3,6 +3,7 @@ AM_INIT_AUTOMAKE($PACKAGE_TARNAME, $PACKAGE_VERSION)
 
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_LANG([C++])
 
 dnl ======================
 dnl Check for GL Headers
@@ -10,6 +11,7 @@ dnl ======================
 
 AC_ARG_WITH(gl-inc,   [  --with-gl-inc=DIR       OpenGL header file location])
 AC_ARG_WITH(glut-inc,   [  --with-glut-inc=DIR       GLUT toolkit header file location])
+AC_ARG_WITH(boost-inc,   [  --with-boost-inc=DIR       Boost libraries header file location])
 
 if test "x$with_gl_inc" = "x" ; then
     GL_CPPFLAGS=""
@@ -23,7 +25,15 @@ else
     GLUT_CPPFLAGS="-I$with_glut_inc"
 fi
 
-dnl check for GL/gl.h
+if test "x$with_boost_inc" = "x" ; then
+    BOOST_CPPFLAGS=""
+else
+    BOOST_CPPFLAGS="-I$with_boost_inc"
+fi
+
+dnl ===================
+dnl Check for GL/gl.h
+dnl ===================
 
 saved_CPPFLAGS="$CPPFLAGS"
 
@@ -44,7 +54,10 @@ fi
 CPPFLAGS="$saved_CPPFLAGS"
 
 
-dnl check for GL/glut.h
+dnl ===================
+dnl Check for GL/glut.h
+dnl ===================
+
 saved_CPPFLAGS="$CPPFLAGS"
 
 AC_DEFUN( CHECK_FOR_GLUT_H, [
@@ -63,6 +76,27 @@ fi
 
 CPPFLAGS="$saved_CPPFLAGS"
 
+dnl ===================
+dnl Check for boost/thread.hpp
+dnl ===================
+
+saved_CPPFLAGS="$CPPFLAGS"
+
+AC_DEFUN( CHECK_FOR_BOOST_THREAD_HPP, [
+    CPPFLAGS="$saved_CPPFLAGS $BOOST_CPPFLAGS"
+
+    AC_MSG_CHECKING([for boost/thread.hpp])
+    AC_TRY_CPP( [ #include <boost/thread.hpp> ], have_boost_thread_hpp=yes, have_boost_thread_hpp=no )
+    AC_MSG_RESULT([$have_boost_thread_hpp])
+])
+
+CHECK_FOR_BOOST_THREAD_HPP
+
+if test "x$have_boost_thread_hpp" = "xno"; then
+    AC_MSG_ERROR([Cannot find boost/thread.hpp])
+fi
+
+CPPFLAGS="$saved_CPPFLAGS"
 
 dnl ===================
 dnl Check for GL library
@@ -178,6 +212,40 @@ fi
 
 LIBS="$saved_LIBS"
 
-LIBS="$LIBS $GL_LIBS $GLUT_LIBS"
+dnl ===================
+dnl Check for Boost
+dnl ===================
+
+AC_ARG_WITH(boost-libs,	[	--with-boost-libs=DIR	Boost libraries location])
+
+if test "x$with_boost_libs" = "x" ; then
+    BOOST_LDOPTS=""
+else
+    BOOST_LDOPTS="-L$with_boost_libs"
+fi
+
+saved_LIBS="$LIBS"
+BOOST_LIBS=""
+
+AC_DEFUN( CHECK_FOR_BOOST_LIB, [
+    AC_MSG_CHECKING([for Boost library])
+    LIBS="$LIBS -lboost_thread-mt -lboost_date_time-mt"
+    AC_TRY_LINK( , , have_BOOST=yes, have_BOOST=no)
+    AC_MSG_RESULT([$have_BOOST])
+
+    if test "x$have_BOOST" = "xyes" ; then
+        BOOST_LIBS="-lboost_thread-mt -lboost_date_time-mt"
+    fi
+])
+
+CHECK_FOR_BOOST_LIB
+
+if test "x$have_BOOST" = "xno" ; then
+    AC_MSG_ERROR([Cannot find Boost library])
+fi
+
+LIBS="$saved_LIBS"
+
+LIBS="$LIBS $GL_LIBS $GLUT_LIBS $BOOST_LIBS"
 
 AC_OUTPUT([Makefile src/Makefile])

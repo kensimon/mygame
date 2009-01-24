@@ -5,19 +5,21 @@
 #include "Config.h"
 #include <iostream>
 #include <cstdlib>
+#include <list>
 
 Game* Game::instance = NULL;
 
-Game::Game()
+Game::Game() :
+read_mutex(), stdout_mutex()
 {
     ic = new ItemCollection();
-    phys = new Physics(ic);
     drawBBoxes = false;
     framewait = 16;
     curbutton = 0;
     width = WINSIZE_X;
     height = WINSIZE_Y;
 	isRendering = false;
+	gravityOn = false;
 };
 
 Game::~Game()
@@ -60,8 +62,10 @@ void Game::timerFunc(int)
 	instance->isRendering = true;
 	glutTimerFunc(instance->framewait, Game::timerFunc, 0);
 	/* Start timer functions here */
-
-    instance->phys->tick();
+	for (std::list<Item*>::iterator pos = instance->ic->getBeginIterator(); pos != instance->ic->getEndIterator(); ++pos)
+	{
+		(*pos)->tick();
+	}
     Game::display();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
@@ -123,7 +127,7 @@ void Game::keyboardFunc(unsigned char key, int, int)
             instance->ic->removeItem(instance->ic->getSelected());
             break;
         case 'g':
-            instance->phys->gravityOn = !instance->phys->gravityOn;
+            instance->gravityOn = !instance->gravityOn;
             break;
         case 'p':
             instance->ic->pop();
@@ -232,10 +236,10 @@ void Game::mouse(int button, int state, int x, int y)
 
 void Game::dragMouse(int x, int y)
 {
-        if (instance->curbutton == GLUT_LEFT_BUTTON && instance->ic->getSelected() != NULL)
-        {
-            instance->ic->getSelected()->dragTo(x, y);
-        }
+	if (instance->curbutton == GLUT_LEFT_BUTTON && instance->ic->getSelected() != NULL)
+	{
+		instance->ic->getSelected()->dragTo(x, y);
+	}
 }
 
 ItemCollection* Game::getItemCollection()
@@ -243,17 +247,20 @@ ItemCollection* Game::getItemCollection()
     return this->ic;
 }
 
-Physics* Game::getPhysicsEngine()
-{
-    return this->phys;
-}
-
 int Game::getWidth()
 {
+	mutex::scoped_lock lock(read_mutex);
     return width;
 }
 
 int Game::getHeight()
 {
+	mutex::scoped_lock lock(read_mutex);
     return height;
+}
+
+bool Game::getGravityOn()
+{
+	mutex::scoped_lock lock(read_mutex);
+	return gravityOn;
 }

@@ -1,8 +1,15 @@
 #include "Item.h"
+#include "Game.h"
 #include <iostream>
 
 Item::Item()
+: thread_stoprequested(false),
+tick_thread(boost::bind(&Item::work, this)),
+elasticity(.9),
+floor_friction(.99),
+bbox(0,0,0,0)
 {
+	instance = Game::getInstance();
     x = 0;
     y = 0;
     degrees = 0;
@@ -27,26 +34,30 @@ Item::Item()
     xclickpos = 0;
     yclickpos = 0;
 
-    bbox = new BBox(0, 0, 0, 0);
-
     grabbed = false;
 }
 
 Item::~Item()
 {
-    delete bbox;
+	thread_stoprequested = true;
+	wait_variable.notify_all();
+	tick_thread.join();
 }
 
-void Item::moveTo(GLdouble x, GLdouble y)
+void Item::moveTo(GLdouble xloc, GLdouble yloc)
 {
-    this->x = x;
-    this->y = y;
-    this->updateBBox();
-    //printf("I moved to %lf, %lf\n", x, y);
+    x = xloc;
+    y = yloc;
+    updateBBox();
 }
 
 void Item::dragTo(GLdouble a, GLdouble b)
 {
+	if (thread_stoprequested)
+	{
+		return;
+	}
+	//mutex::scoped_lock lock(tick_mutex);
     x += a - xclickpos;
     y += b - yclickpos;
 
@@ -55,14 +66,14 @@ void Item::dragTo(GLdouble a, GLdouble b)
 
     xclickpos = a;
     yclickpos = b;
-    this->updateBBox();
+    updateBBox();
 }
 
 void Item::resize (GLdouble x)
 {
     //printf("Resizing to %lf\n", x);
     size += x;
-    this->updateBBox();
+    updateBBox();
 }
 
 void Item::setMass(GLdouble newMass)
@@ -100,11 +111,9 @@ void Item::drawBBox()
 
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
 
-    /* Move the square to where it belongs */
     glTranslated(objx, -objy, objz);
     glColor4d(red, green, blue, 0.3);
-    glRectd(bbox->min[0] - x, bbox->min[1] - y, bbox->max[0] - x, bbox->max[1] - y);
-    //glRectd(10,-10, -10, 10);
+    glRectd(bbox.min[0] - x, bbox.min[1] - y, bbox.max[0] - x, bbox.max[1] - y);
     glPopMatrix();
 } 
 
@@ -116,8 +125,7 @@ void Item::rotate()
     else if (degrees < -360.0)
         degrees += 360.0;
 
-    this->updateBBox();
-    //glutPostRedisplay();
+    updateBBox();
 }
 
 GLdouble Item::getRotation()
@@ -158,11 +166,126 @@ void Item::setClickPos(GLdouble x, GLdouble y)
     yclickpos = y;
 }
 
-BBox* Item::getBBox()
-{
-    return bbox;
-}
-
 void Item::updateBBox()
 {
+}
+
+void Item::tick()
+{
+	wait_variable.notify_all();
+}
+
+void Item::work()
+{
+	while (!thread_stoprequested)
+	{
+		mutex::scoped_lock lock(tick_mutex);
+		wait_variable.wait(lock);
+		if (thread_stoprequested) //the destructor also calls notify_all(), so if we're being destructed, quit now.
+		{
+			return;
+		}
+
+		rotate();
+
+		if (grabbed)
+		{
+			momentumX = 0;
+			momentumY = 0;
+			if (gety() > instance->getHeight())
+				moveTo(getx(), instance->getHeight());
+			if (getx() > instance->getWidth())
+				moveTo(instance->getWidth(), gety());
+			if (gety() < 0)
+				moveTo(getx(), 0);
+			if (getx() < 0)
+				moveTo(0, gety());
+			continue; //nothing more to do if we're being grabbed.
+		}
+		/* Calculate new y position */
+		/* Gravity adds to velocity */
+		if (instance->getGravityOn() && ((gety() < instance->getHeight()) || (momentumY != 0)))
+		{
+			momentumY += GRAVITY;
+		}
+
+
+		/* Move vertically based on velocity */
+		momentumY *= VISCOCITY;
+		moveTo(getx(), gety() + momentumY);
+
+		if (bbox.min[1] >= instance->getHeight())
+		{
+			/* item hit floor -- bounce off floor */
+
+			/* Reverse ball velocity */
+			momentumY = -momentumY;
+
+			moveTo(getx(), gety() + momentumY);
+
+			if (instance->getGravityOn() && fabs(momentumY) < GRAVITY)
+				/* This helps dampen rounding errors that cause balls to
+				   bounce forever */
+				momentumY = 0;
+			else
+			{
+				/* Ball velocity is reduced by the percentage elasticity */
+				momentumY *= elasticity;
+				momentumX *= floor_friction;
+				moveTo(getx(), instance->getHeight() -
+						(instance->getHeight() - gety()) * elasticity);
+			}
+		}
+		else
+		if (bbox.max[1] < 0)
+		{
+			/* Reverse ball velocity */
+			momentumY = -momentumY;
+
+			/* Ball velocity is reduced by the percentage elasticity */
+			momentumY *= elasticity;
+
+			/* Bounce off the wall */
+			moveTo(getx(), -gety());
+		}
+
+
+		/* Calculate new x position */
+		/* Move horizontally based on velocity */
+		momentumX *= VISCOCITY;
+		moveTo(getx() + momentumX, gety());
+
+		if (bbox.min[0] > instance->getWidth())
+		{
+			/* Hit right wall */
+			/* Reverse ball velocity */
+			momentumX = -momentumX;
+
+			/* Ball velocity is reduced by the percentage elasticity */
+			momentumX *= elasticity;
+			momentumY *= floor_friction;
+
+			/* Bounce off the wall */
+			moveTo(-getx() + instance->getWidth() * 2, gety());
+		}
+		else if (bbox.max[0] < 0)
+		{
+			/* Hit left wall */
+			/* Reverse ball velocity */
+			momentumX = -momentumX;
+
+			/* Ball velocity is reduced by the percentage elasticity */
+			momentumX *= elasticity;
+
+			/* Bounce off the wall */
+			moveTo(-getx(), gety());
+		}
+
+
+		/* Slow ball if it is rolling on the floor */
+
+		if (instance->getGravityOn() && fabs(gety()) >= instance->getHeight() - GRAVITY &&
+				momentumY == 0)
+				momentumX *= floor_friction;
+	}
 }
