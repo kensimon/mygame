@@ -75,6 +75,7 @@ class Item
         GLdouble y;
         GLdouble objx;
         GLdouble objy;
+		GLdouble objz;
         GLdouble objsizex;
         GLdouble objsizey;
         GLdouble objsizez;
@@ -88,6 +89,9 @@ class Item
         GLdouble yclickpos;
 		GLdouble elasticity;
 		GLdouble floor_friction;
+		GLdouble modelMatrix[16];
+		GLdouble projMatrix[16];
+		GLint viewport[4];
 		boost::condition_variable wait_variable;
         BBox bbox;
 		bool thread_stoprequested;

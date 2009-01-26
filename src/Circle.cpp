@@ -1,14 +1,15 @@
 #include "Circle.h"
 #include "Game.h"
 
-Circle::Circle(int xpos, int ypos, int size)
+Circle::Circle(int xpos, int ypos, int itemsize)
 {
-    this->x = xpos;
-    this->y = ypos;
-    this->size = size;
+    x = xpos;
+    y = ypos;
+    size = itemsize;
     degrees = 0;
     objx = 0;
     objy = 0;
+    objz = 0;
     objsizex = 0;
     objsizey = 0;
     objsizez = 0;
@@ -24,10 +25,6 @@ Circle::~Circle()
 
 void Circle::draw()
 {
-    GLdouble objz = 0;
-    GLdouble modelMatrix[16];
-    GLdouble projMatrix[16];
-    GLint viewport[4];
     glPushMatrix();
     glLoadIdentity();
 

@@ -57,7 +57,6 @@ void Item::dragTo(GLdouble a, GLdouble b)
 	{
 		return;
 	}
-	//mutex::scoped_lock lock(tick_mutex);
     x += a - xclickpos;
     y += b - yclickpos;
 
@@ -71,7 +70,6 @@ void Item::dragTo(GLdouble a, GLdouble b)
 
 void Item::resize (GLdouble x)
 {
-    //printf("Resizing to %lf\n", x);
     size += x;
     updateBBox();
 }
@@ -97,11 +95,6 @@ void Item::draw()
 
 void Item::drawBBox()
 {
-    GLdouble objz = 0;
-    GLdouble modelMatrix[16];
-    GLdouble projMatrix[16];
-    GLint viewport[4];
-
     glPushMatrix();
     glLoadIdentity();
 
@@ -192,19 +185,19 @@ void Item::work()
 		{
 			momentumX = 0;
 			momentumY = 0;
-			if (gety() > instance->getHeight())
-				moveTo(getx(), instance->getHeight());
-			if (getx() > instance->getWidth())
-				moveTo(instance->getWidth(), gety());
-			if (gety() < 0)
-				moveTo(getx(), 0);
-			if (getx() < 0)
-				moveTo(0, gety());
+			if (y > instance->getHeight())
+				moveTo(x, instance->getHeight());
+			if (x > instance->getWidth())
+				moveTo(instance->getWidth(), y);
+			if (y < 0)
+				moveTo(x, 0);
+			if (x < 0)
+				moveTo(0, y);
 			continue; //nothing more to do if we're being grabbed.
 		}
 		/* Calculate new y position */
 		/* Gravity adds to velocity */
-		if (instance->getGravityOn() && ((gety() < instance->getHeight()) || (momentumY != 0)))
+		if (instance->getGravityOn() && ((y < instance->getHeight()) || (momentumY != 0)))
 		{
 			momentumY += GRAVITY;
 		}
@@ -212,7 +205,7 @@ void Item::work()
 
 		/* Move vertically based on velocity */
 		momentumY *= VISCOCITY;
-		moveTo(getx(), gety() + momentumY);
+		moveTo(x, y + momentumY);
 
 		if (bbox.min[1] >= instance->getHeight())
 		{
@@ -221,7 +214,7 @@ void Item::work()
 			/* Reverse ball velocity */
 			momentumY = -momentumY;
 
-			moveTo(getx(), gety() + momentumY);
+			moveTo(x, y + momentumY);
 
 			if (instance->getGravityOn() && fabs(momentumY) < GRAVITY)
 				/* This helps dampen rounding errors that cause balls to
@@ -232,8 +225,8 @@ void Item::work()
 				/* Ball velocity is reduced by the percentage elasticity */
 				momentumY *= elasticity;
 				momentumX *= floor_friction;
-				moveTo(getx(), instance->getHeight() -
-						(instance->getHeight() - gety()) * elasticity);
+				moveTo(x, instance->getHeight() -
+						(instance->getHeight() - y) * elasticity);
 			}
 		}
 		else
@@ -246,14 +239,14 @@ void Item::work()
 			momentumY *= elasticity;
 
 			/* Bounce off the wall */
-			moveTo(getx(), -gety());
+			moveTo(x, y);
 		}
 
 
 		/* Calculate new x position */
 		/* Move horizontally based on velocity */
 		momentumX *= VISCOCITY;
-		moveTo(getx() + momentumX, gety());
+		moveTo(x + momentumX, y);
 
 		if (bbox.min[0] > instance->getWidth())
 		{
@@ -266,7 +259,7 @@ void Item::work()
 			momentumY *= floor_friction;
 
 			/* Bounce off the wall */
-			moveTo(-getx() + instance->getWidth() * 2, gety());
+			moveTo(-x + instance->getWidth() * 2, y);
 		}
 		else if (bbox.max[0] < 0)
 		{
@@ -278,13 +271,13 @@ void Item::work()
 			momentumX *= elasticity;
 
 			/* Bounce off the wall */
-			moveTo(-getx(), gety());
+			moveTo(-x, y);
 		}
 
 
 		/* Slow ball if it is rolling on the floor */
 
-		if (instance->getGravityOn() && fabs(gety()) >= instance->getHeight() - GRAVITY &&
+		if (instance->getGravityOn() && fabs(y) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
 				momentumX *= floor_friction;
 	}

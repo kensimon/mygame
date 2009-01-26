@@ -3,9 +3,9 @@
 
 Square::Square(int xpos, int ypos, int size)
 {
-    this->x = xpos;
-    this->y = ypos;
-    this->size = size;
+    x = xpos;
+    y = ypos;
+    size = size;
     degrees = 0;
 	floor_friction = 0.75;
 	elasticity = 0.75;
@@ -17,11 +17,6 @@ Square::~Square()
 
 void Square::draw()
 {
-    GLdouble objz = 0;
-    GLdouble modelMatrix[16];
-    GLdouble projMatrix[16];
-    GLint viewport[4];
-
     glPushMatrix();
     glLoadIdentity();
 
@@ -39,7 +34,6 @@ void Square::draw()
     glColor4d(0.0, 0.0, 0.0, 0.8);
     glRectd(size*.9, -(size*.9), -(size*.9), size*.9);
     glPopMatrix();
-    //glutPostRedisplay();
 } 
 
 void Square::updateBBox()
