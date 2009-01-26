@@ -45,8 +45,8 @@ void Square::updateBBox()
     h = csize * sin(theta);
 
     w = h = max(w,h);
-    bbox.min[0] = x - w;
-    bbox.min[1] = y - h;
-    bbox.max[0] = x + w;
-    bbox.max[1] = y + h;
+    bbox.min_x = x - w;
+    bbox.min_y = y - h;
+    bbox.max_x = x + w;
+    bbox.max_y = y + h;
 }

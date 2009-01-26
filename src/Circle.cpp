@@ -32,7 +32,6 @@ void Circle::draw()
     glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
     glGetIntegerv(GL_VIEWPORT, viewport);
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
-    gluUnProject(size, 0, 0, modelMatrix, projMatrix, viewport, &objsizex, &objsizey, &objsizez);
 
     glTranslated(objx, -objy, objz);
     glRotated(degrees, 0, 0, objz);
@@ -45,8 +44,20 @@ void Circle::draw()
 
 void Circle::updateBBox()
 {
-    bbox.min[0] = x - size;
-    bbox.min[1] = y + size;
-    bbox.max[0] = x + size;
-    bbox.max[1] = y - size;
+	GLdouble z;
+    bbox.min_x = x - size;
+    bbox.min_y = y + size;
+    bbox.max_x = x + size;
+    bbox.max_y = y - size;
+
+	glPushMatrix();
+    glLoadIdentity();
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
+	gluProject(objx + size, objy + size, objz, modelMatrix, projMatrix, viewport, &(bbox.max_screenx), &(bbox.max_screeny), &z);
+	gluProject(objx - size, objy - size, objz, modelMatrix, projMatrix, viewport, &(bbox.min_screenx), &(bbox.min_screeny), &z);
+	glPopMatrix();
 }

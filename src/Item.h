@@ -28,16 +28,21 @@ class BBox
 {
     public:
     BBox()  {}
-	GLdouble min[2];
-    GLdouble max[2];
+	GLdouble min_x;
+	GLdouble min_y;
+	GLdouble max_x;
+	GLdouble max_y;
+	GLdouble max_screenx;
+	GLdouble max_screeny;
+	GLdouble min_screenx;
+	GLdouble min_screeny;
 
-    BBox(GLdouble a_minX, GLdouble a_minY, GLdouble a_maxX, GLdouble a_maxY)
+    BBox(GLdouble minX, GLdouble minY, GLdouble maxX, GLdouble maxY)
     {
-        min[0] = a_minX;
-        min[1] = a_minY;
-
-        max[0] = a_maxX;
-        max[1] = a_maxY;
+        min_x = min_screenx = minX;
+        min_y = min_screeny = minY;
+        max_x = max_screenx = maxX;
+        max_y = max_screeny = maxY;
     }
 };
 
@@ -54,7 +59,6 @@ class Item
         GLdouble getobjx();
         GLdouble getobjy();
         int getSpinMomentum();
-        void rotate();
         virtual void draw();
         void drawBBox();
         GLdouble getRotation();

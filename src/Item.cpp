@@ -25,6 +25,7 @@ bbox(0,0,0,0)
     //They should get moved the first time they're drawn.
     objx = 0;
     objy = 0;
+	objz = 0;
     objsizex = 0;
     objsizey = 0;
     objsizez = 0;
@@ -57,6 +58,7 @@ void Item::dragTo(GLdouble a, GLdouble b)
 	{
 		return;
 	}
+	mutex::scoped_lock lock(tick_mutex);
     x += a - xclickpos;
     y += b - yclickpos;
 
@@ -106,20 +108,9 @@ void Item::drawBBox()
 
     glTranslated(objx, -objy, objz);
     glColor4d(red, green, blue, 0.3);
-    glRectd(bbox.min[0] - x, bbox.min[1] - y, bbox.max[0] - x, bbox.max[1] - y);
+    glRectd(bbox.min_x - x, bbox.min_y - y, bbox.max_x - x, bbox.max_y - y);
     glPopMatrix();
 } 
-
-void Item::rotate()
-{
-    degrees += spinMomentum;
-    if (degrees > 360.0)
-        degrees -= 360.0;
-    else if (degrees < -360.0)
-        degrees += 360.0;
-
-    updateBBox();
-}
 
 GLdouble Item::getRotation()
 {
@@ -179,20 +170,24 @@ void Item::work()
 			return;
 		}
 
-		rotate();
+		degrees += spinMomentum;
+		if (degrees > 360.0)
+			degrees -= 360.0;
+		else if (degrees < -360.0)
+			degrees += 360.0;
 
 		if (grabbed)
 		{
 			momentumX = 0;
 			momentumY = 0;
-			if (y > instance->getHeight())
-				moveTo(x, instance->getHeight());
-			if (x > instance->getWidth())
-				moveTo(instance->getWidth(), y);
-			if (y < 0)
-				moveTo(x, 0);
-			if (x < 0)
-				moveTo(0, y);
+			if (bbox.max_screeny > instance->getHeight())
+				y = instance->getHeight() - (bbox.max_screeny - y);
+			if (bbox.max_screenx > instance->getWidth())
+				x = instance->getWidth() - (bbox.max_screenx - x);
+			if (bbox.min_screeny < 0)
+				y = y - bbox.min_screeny;
+			if (bbox.min_screenx < 0)
+				x = x - bbox.min_screenx;
 			continue; //nothing more to do if we're being grabbed.
 		}
 		/* Calculate new y position */
@@ -205,50 +200,53 @@ void Item::work()
 
 		/* Move vertically based on velocity */
 		momentumY *= VISCOCITY;
-		moveTo(x, y + momentumY);
+		y += momentumY;
+		
+		/* Move horizontally based on velocity */
+		momentumX *= VISCOCITY;
+		x = x + momentumX;
 
-		if (bbox.min[1] >= instance->getHeight())
+		updateBBox();
+
+		if (bbox.max_screeny >= instance->getHeight())
 		{
 			/* item hit floor -- bounce off floor */
 
-			/* Reverse ball velocity */
+			/* Reverse ball velocity, apply momentum, recalculate bounding box. */
 			momentumY = -momentumY;
 
-			moveTo(x, y + momentumY);
-
 			if (instance->getGravityOn() && fabs(momentumY) < GRAVITY)
+			{
 				/* This helps dampen rounding errors that cause balls to
 				   bounce forever */
 				momentumY = 0;
+				y = instance->getHeight() - (bbox.max_screeny - y);
+			}
 			else
 			{
 				/* Ball velocity is reduced by the percentage elasticity */
 				momentumY *= elasticity;
 				momentumX *= floor_friction;
-				moveTo(x, instance->getHeight() -
-						(instance->getHeight() - y) * elasticity);
 			}
+			
+			y += momentumY;
 		}
 		else
-		if (bbox.max[1] < 0)
+		if (bbox.min_screeny < 0)
 		{
 			/* Reverse ball velocity */
 			momentumY = -momentumY;
 
 			/* Ball velocity is reduced by the percentage elasticity */
 			momentumY *= elasticity;
+			momentumX *= elasticity;
 
-			/* Bounce off the wall */
-			moveTo(x, y);
+			y += momentumY;
 		}
 
+		updateBBox();
 
-		/* Calculate new x position */
-		/* Move horizontally based on velocity */
-		momentumX *= VISCOCITY;
-		moveTo(x + momentumX, y);
-
-		if (bbox.min[0] > instance->getWidth())
+		if (bbox.max_screenx > instance->getWidth())
 		{
 			/* Hit right wall */
 			/* Reverse ball velocity */
@@ -259,9 +257,9 @@ void Item::work()
 			momentumY *= floor_friction;
 
 			/* Bounce off the wall */
-			moveTo(-x + instance->getWidth() * 2, y);
+			x -= bbox.max_screenx - instance->getWidth();
 		}
-		else if (bbox.max[0] < 0)
+		else if (bbox.min_screenx < 0)
 		{
 			/* Hit left wall */
 			/* Reverse ball velocity */
@@ -271,13 +269,14 @@ void Item::work()
 			momentumX *= elasticity;
 
 			/* Bounce off the wall */
-			moveTo(-x, y);
+			x += -(bbox.min_screenx);
 		}
+		updateBBox();
 
 
 		/* Slow ball if it is rolling on the floor */
 
-		if (instance->getGravityOn() && fabs(y) >= instance->getHeight() - GRAVITY &&
+		if (instance->getGravityOn() && fabs(bbox.max_screeny) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
 				momentumX *= floor_friction;
 	}
