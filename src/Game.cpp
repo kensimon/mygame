@@ -10,7 +10,8 @@
 Game* Game::instance = NULL;
 
 Game::Game() :
-read_mutex(), stdout_mutex()
+read_mutex(), stdout_mutex(), phys_thread_stoprequested(false),
+phys_thread(boost::bind(&Game::physicsLoop, this))
 {
     ic = new ItemCollection();
     drawBBoxes = false;
@@ -25,6 +26,8 @@ read_mutex(), stdout_mutex()
 
 Game::~Game()
 {
+	phys_thread_stoprequested = true;
+	phys_thread.join();
 };
 
 Game* Game::getInstance()
@@ -51,7 +54,6 @@ int Game::init(int argc, char **argv)
     glutKeyboardFunc(Game::keyboardFunc);
     glutSpecialFunc(Game::specialFunc);
     glutTimerFunc(Game::framewait, Game::drawTimerCallback, 0);
-	glutTimerFunc(Game::framewait, Game::physTimerCallback, 0);
     glutMotionFunc(Game::dragMouse);
     glutMainLoop();
     return 0;
@@ -73,17 +75,16 @@ void Game::drawTimerCallback(int)
 	instance->isRendering = false;
 }
 
-void Game::physTimerCallback(int)
+void Game::physicsLoop()
 {
-	if (instance->isCalculating)
-		return;
-	instance->isCalculating = true;
-	glutTimerFunc(instance->framewait, Game::physTimerCallback, 0);
-	for (std::list<Item*>::iterator pos = instance->ic->getBeginIterator(); pos != instance->ic->getEndIterator(); ++pos)
+	while (!phys_thread_stoprequested)
 	{
-		(*pos)->tick();
+		for (std::list<Item*>::iterator pos = ic->getBeginIterator(); pos != ic->getEndIterator(); ++pos)
+		{
+			(*pos)->tick();
+		}
+		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, framewait * 1000));
 	}
-	instance->isCalculating = false;
 }
 
 void Game::display()

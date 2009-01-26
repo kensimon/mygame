@@ -54,6 +54,7 @@ class Item
         virtual ~Item();
         void resize(GLdouble x);
         void setMass(GLdouble newMass);
+		void stop();
         GLdouble getx();
         GLdouble gety();
         int getSpinMomentum();

@@ -40,9 +40,17 @@ bbox(0,0,0,0)
 
 Item::~Item()
 {
-	thread_stoprequested = true;
-	wait_variable.notify_all();
-	tick_thread.join();
+	stop();
+}
+
+void Item::stop()
+{
+	if (tick_thread.joinable())
+	{
+		thread_stoprequested = true;
+		wait_variable.notify_all();
+		tick_thread.join();
+	}
 }
 
 void Item::dragTo(GLdouble a, GLdouble b)

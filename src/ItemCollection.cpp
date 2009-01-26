@@ -36,6 +36,7 @@ void ItemCollection::removeItem(Item* i)
 	if (i == NULL)
 		return;
 
+	i->stop();
 	items.remove(i);
 	delete i;
 	if (selected == i)
@@ -46,23 +47,12 @@ void ItemCollection::removeItem(Item* i)
 
 void ItemCollection::removeItem(int num)
 {
-	Item* toDelete = get(num);
-	removeItem(toDelete);
+	removeItem(get(num));
 }
 
 void ItemCollection::pop()
 {
-	if (items.size() == 0)
-		return;
-
-	Item* toDelete = items.back();
-	items.pop_back();
-	delete toDelete;
-
-	if (selected == toDelete)
-	{
-		selected = NULL;
-	}
+	removeItem(items.size() - 1);
 }
 
 void ItemCollection::drawAll()

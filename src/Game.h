@@ -6,6 +6,7 @@
 #include <boost/thread.hpp>
 
 using boost::mutex;
+using boost::thread;
 
 class Game
 {
@@ -28,8 +29,8 @@ class Game
         static void keyboardFunc(unsigned char, int, int);
         static void specialFunc(int, int, int);
         static void drawTimerCallback(int);
-		static void physTimerCallback(int);
         static void dragMouse(int, int);
+		void physicsLoop();
         static Game* instance;
         int curbutton;
         int framewait;
@@ -38,6 +39,8 @@ class Game
         int height;
 		mutex read_mutex;
 		bool gravityOn;
+		boost::thread phys_thread;
+		bool phys_thread_stoprequested;
 
 
     protected:
