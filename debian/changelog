@@ -1,3 +1,13 @@
+mygame (0.0.5) jaunty; urgency=low
+
+  * Multithreaded items
+  * Better bouncing off walls
+  * Item throwing not so spotty on linux
+  * Better wall collision detection
+  * Lots of internal changes
+
+ -- Kenneth E. Simon <simon23@oakland.edu>  Mon, 26 Jan 2009 16:00:20 -0500
+
 mygame (0.0.4) feisty; urgency=low
 
   * Physics!  (well, just gravity and bouncing off walls for now.)
