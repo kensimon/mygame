@@ -52,7 +52,6 @@ class Item
     public:
         Item();
         virtual ~Item();
-        void moveTo(GLdouble x, GLdouble y);
         void resize(GLdouble x);
         void setMass(GLdouble newMass);
         GLdouble getx();

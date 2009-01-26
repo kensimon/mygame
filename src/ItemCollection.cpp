@@ -13,7 +13,6 @@ ItemCollection::~ItemCollection()
 {
 }
 
-
 void ItemCollection::push(Item* n)
 {
 	items.push_back(n);

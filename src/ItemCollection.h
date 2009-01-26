@@ -25,6 +25,7 @@ public:
 private:
 		Item* selected;
 		list<Item*> items;
+		void timerCallback();
 };
 
 #endif

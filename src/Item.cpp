@@ -45,13 +45,6 @@ Item::~Item()
 	tick_thread.join();
 }
 
-void Item::moveTo(GLdouble xloc, GLdouble yloc)
-{
-    x = xloc;
-    y = yloc;
-    updateBBox();
-}
-
 void Item::dragTo(GLdouble a, GLdouble b)
 {
 	if (thread_stoprequested)
@@ -59,15 +52,46 @@ void Item::dragTo(GLdouble a, GLdouble b)
 		return;
 	}
 	mutex::scoped_lock lock(tick_mutex);
-    x += a - xclickpos;
-    y += b - yclickpos;
 
-    momentumX = (a - xclickpos);
-    momentumY = (b - yclickpos);
+	if (x + (a - xclickpos) + (bbox.max_x - x) > instance->getWidth())
+	{
+		//trying to push it past the right wall
+		x = instance->getWidth() - (bbox.max_x - x);
+		momentumX = 0;
+	}
+	else if (x + (a - xclickpos) - (x - bbox.min_x) < 0)
+	{
+		//trying to push it past the left wall
+		x = x - bbox.min_x;
+		momentumX = 0;
+	}
+	else
+	{
+		x += a - xclickpos;
+		momentumX = (a - xclickpos);
+		xclickpos = a;
+	}
 
-    xclickpos = a;
-    yclickpos = b;
-    updateBBox();
+	if (y + (b - yclickpos) + (bbox.max_y - y) > instance->getHeight())
+	{
+		//trying to push it past the floor
+		y = instance->getHeight() - (bbox.max_y - y);
+		momentumY = 0;
+	}
+	else if (y + (b - yclickpos) - (y - bbox.min_y) < 0)
+	{
+		//trying to push it past the ceiling
+		y = y - bbox.min_y;
+		momentumY = 0;
+	}
+	else
+	{
+		y += b - yclickpos;
+		momentumY = (b - yclickpos);		
+		yclickpos = b;
+	}
+	
+	updateBBox();
 }
 
 void Item::resize (GLdouble x)
@@ -170,16 +194,6 @@ void Item::work()
 
 		if (grabbed)
 		{
-			momentumX = 0;
-			momentumY = 0;
-			if (bbox.max_y > instance->getHeight())
-				y = instance->getHeight() - (bbox.max_y - y);
-			if (bbox.max_x > instance->getWidth())
-				x = instance->getWidth() - (bbox.max_x - x);
-			if (bbox.min_y < 0)
-				y = y - bbox.min_y;
-			if (bbox.min_x < 0)
-				x = x - bbox.min_x;
 			continue; //nothing more to do if we're being grabbed.
 		}
 		/* Calculate new y position */
@@ -204,7 +218,6 @@ void Item::work()
 		{
 			/* item hit floor -- bounce off floor */
 
-			/* Reverse ball velocity, apply momentum, recalculate bounding box. */
 			momentumY = -momentumY;
 
 			if (instance->getGravityOn() && fabs(momentumY) < GRAVITY)
@@ -235,8 +248,6 @@ void Item::work()
 
 			y += momentumY;
 		}
-
-		updateBBox();
 
 		if (bbox.max_x > instance->getWidth())
 		{

@@ -12,6 +12,7 @@ class Game
     public:
         static Game* getInstance();
 		bool isRendering;
+		bool isCalculating;
         int init(int, char**);
         bool drawBBoxes;
         ItemCollection* getItemCollection();
@@ -26,7 +27,8 @@ class Game
         static void mouse(int, int, int, int);
         static void keyboardFunc(unsigned char, int, int);
         static void specialFunc(int, int, int);
-        static void timerFunc(int);
+        static void drawTimerCallback(int);
+		static void physTimerCallback(int);
         static void dragMouse(int, int);
         static Game* instance;
         int curbutton;

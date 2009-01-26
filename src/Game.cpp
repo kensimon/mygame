@@ -19,6 +19,7 @@ read_mutex(), stdout_mutex()
     width = WINSIZE_X;
     height = WINSIZE_Y;
 	isRendering = false;
+	isCalculating = false;
 	gravityOn = false;
 };
 
@@ -49,33 +50,40 @@ int Game::init(int argc, char **argv)
     glutMouseFunc(Game::mouse);
     glutKeyboardFunc(Game::keyboardFunc);
     glutSpecialFunc(Game::specialFunc);
-    glutTimerFunc(Game::framewait, Game::timerFunc, 0);
+    glutTimerFunc(Game::framewait, Game::drawTimerCallback, 0);
+	glutTimerFunc(Game::framewait, Game::physTimerCallback, 0);
     glutMotionFunc(Game::dragMouse);
     glutMainLoop();
     return 0;
 }
 
-void Game::timerFunc(int)
+void Game::drawTimerCallback(int)
 {
 	if (instance->isRendering)
 		return;
 	instance->isRendering = true;
-	glutTimerFunc(instance->framewait, Game::timerFunc, 0);
+	glutTimerFunc(instance->framewait, Game::drawTimerCallback, 0);
 	/* Start timer functions here */
-	for (std::list<Item*>::iterator pos = instance->ic->getBeginIterator(); pos != instance->ic->getEndIterator(); ++pos)
-	{
-		(*pos)->tick();
-	}
     Game::display();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
         printf ("%s\n", (char*)error);
 
 	/* End timer functions here */
-#ifdef _WINDOWS_ //Lubix seems to sleep just fine without this.
-	Sleep(instance->framewait);
-#endif
 	instance->isRendering = false;
+}
+
+void Game::physTimerCallback(int)
+{
+	if (instance->isCalculating)
+		return;
+	instance->isCalculating = true;
+	glutTimerFunc(instance->framewait, Game::physTimerCallback, 0);
+	for (std::list<Item*>::iterator pos = instance->ic->getBeginIterator(); pos != instance->ic->getEndIterator(); ++pos)
+	{
+		(*pos)->tick();
+	}
+	instance->isCalculating = false;
 }
 
 void Game::display()
