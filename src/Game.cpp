@@ -20,7 +20,7 @@ read_mutex(), stdout_mutex()
     height = WINSIZE_Y;
 	isRendering = false;
 	isCalculating = false;
-	gravityOn = false;
+	gravityOn = true;
 };
 
 Game::~Game()
