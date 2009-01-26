@@ -105,10 +105,12 @@ void Item::drawBBox()
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &objx, &objy, &objz);
+	gluUnProject(bbox.max_x, bbox.max_y, 0, modelMatrix, projMatrix, viewport, &(bbox.max_objx), &(bbox.max_objy), &objz);
+	gluUnProject(bbox.min_x, bbox.min_y, 0, modelMatrix, projMatrix, viewport, &(bbox.min_objx), &(bbox.min_objy), &objz);
 
     glTranslated(objx, -objy, objz);
     glColor4d(red, green, blue, 0.3);
-    glRectd(bbox.min_x - x, bbox.min_y - y, bbox.max_x - x, bbox.max_y - y);
+    glRectd(bbox.min_objx - objx, bbox.min_objy - objy, bbox.max_objx - objx, bbox.max_objy - objy);
     glPopMatrix();
 } 
 
@@ -127,16 +129,6 @@ void Item::setColor(GLdouble red, GLdouble green, GLdouble blue)
     this->red = red;
     this->green = green;
     this->blue = blue;
-}
-
-GLdouble Item::getobjx()
-{
-    return objx;
-}
-
-GLdouble Item::getobjy()
-{
-    return objy;
 }
 
 GLdouble Item::getMass()
@@ -180,14 +172,14 @@ void Item::work()
 		{
 			momentumX = 0;
 			momentumY = 0;
-			if (bbox.max_screeny > instance->getHeight())
-				y = instance->getHeight() - (bbox.max_screeny - y);
-			if (bbox.max_screenx > instance->getWidth())
-				x = instance->getWidth() - (bbox.max_screenx - x);
-			if (bbox.min_screeny < 0)
-				y = y - bbox.min_screeny;
-			if (bbox.min_screenx < 0)
-				x = x - bbox.min_screenx;
+			if (bbox.max_y > instance->getHeight())
+				y = instance->getHeight() - (bbox.max_y - y);
+			if (bbox.max_x > instance->getWidth())
+				x = instance->getWidth() - (bbox.max_x - x);
+			if (bbox.min_y < 0)
+				y = y - bbox.min_y;
+			if (bbox.min_x < 0)
+				x = x - bbox.min_x;
 			continue; //nothing more to do if we're being grabbed.
 		}
 		/* Calculate new y position */
@@ -208,7 +200,7 @@ void Item::work()
 
 		updateBBox();
 
-		if (bbox.max_screeny >= instance->getHeight())
+		if (bbox.max_y >= instance->getHeight())
 		{
 			/* item hit floor -- bounce off floor */
 
@@ -220,7 +212,7 @@ void Item::work()
 				/* This helps dampen rounding errors that cause balls to
 				   bounce forever */
 				momentumY = 0;
-				y = instance->getHeight() - (bbox.max_screeny - y);
+				y = instance->getHeight() - (bbox.max_y - y);
 			}
 			else
 			{
@@ -232,7 +224,7 @@ void Item::work()
 			y += momentumY;
 		}
 		else
-		if (bbox.min_screeny < 0)
+		if (bbox.min_y < 0)
 		{
 			/* Reverse ball velocity */
 			momentumY = -momentumY;
@@ -246,7 +238,7 @@ void Item::work()
 
 		updateBBox();
 
-		if (bbox.max_screenx > instance->getWidth())
+		if (bbox.max_x > instance->getWidth())
 		{
 			/* Hit right wall */
 			/* Reverse ball velocity */
@@ -257,9 +249,9 @@ void Item::work()
 			momentumY *= floor_friction;
 
 			/* Bounce off the wall */
-			x -= bbox.max_screenx - instance->getWidth();
+			x -= bbox.max_x - instance->getWidth();
 		}
-		else if (bbox.min_screenx < 0)
+		else if (bbox.min_x < 0)
 		{
 			/* Hit left wall */
 			/* Reverse ball velocity */
@@ -269,14 +261,14 @@ void Item::work()
 			momentumX *= elasticity;
 
 			/* Bounce off the wall */
-			x += -(bbox.min_screenx);
+			x += -(bbox.min_x);
 		}
 		updateBBox();
 
 
 		/* Slow ball if it is rolling on the floor */
 
-		if (instance->getGravityOn() && fabs(bbox.max_screeny) >= instance->getHeight() - GRAVITY &&
+		if (instance->getGravityOn() && fabs(bbox.max_y) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
 				momentumX *= floor_friction;
 	}

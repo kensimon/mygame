@@ -80,17 +80,6 @@ void ItemCollection::drawAll()
 
 void ItemCollection::select(GLdouble x, GLdouble y)
 {
-    /* Translate x and y into world coordinates */
-    GLdouble objz = 0;
-    GLdouble modelMatrix[16];
-    GLdouble projMatrix[16];
-    GLint viewport[4];
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    //(x and y are translated here.)
-    gluUnProject(x, y, 0, modelMatrix, projMatrix, viewport, &x, &y, &objz);
-
     Item* cur;
     bool done = false;
 	
@@ -105,10 +94,10 @@ void ItemCollection::select(GLdouble x, GLdouble y)
 		cur = *(pos);
 
         // Is this what we tried to click on?
-        if (x <= (cur->getobjx() + cur->getSize()) &&
-                x >= (cur->getobjx() - cur->getSize()) &&
-                y <= (cur->getobjy() + cur->getSize()) &&
-                y >= (cur->getobjy() - cur->getSize()))
+        if (x <= (cur->getx() + cur->getSize()) &&
+                x >= (cur->getx() - cur->getSize()) &&
+                y <= (cur->gety() + cur->getSize()) &&
+                y >= (cur->gety() - cur->getSize()))
         {
 			if (selected != NULL) //de-color the previously selected item 
 			{

@@ -6,7 +6,7 @@
 class Circle : public Item
 {
     public:
-        Circle(int xpos = 250, int ypos = 250, int size = 3);
+        Circle(int xpos = 250, int ypos = 250, int size = 10);
         ~Circle();
         void draw();
         void drawBBox();

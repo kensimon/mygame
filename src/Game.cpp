@@ -175,6 +175,10 @@ void Game::keyboardFunc(unsigned char key, int, int)
 
 void Game::specialFunc(int key, int x, int y)
 {
+	if (instance->ic->getSelected() == NULL)
+	{
+		return;
+	}
     switch(key)
     {
         case GLUT_KEY_UP:
