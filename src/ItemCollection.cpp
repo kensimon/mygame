@@ -3,7 +3,8 @@
 #include "Game.h"
 #include <iostream>
 
-ItemCollection::ItemCollection()
+ItemCollection::ItemCollection() :
+collisions_mutex()
 {
 	selected = NULL;
 }
@@ -20,6 +21,7 @@ void ItemCollection::push(Item* n)
 
 Item* ItemCollection::get(int num)
 {
+	mutex::scoped_lock lock(iteration_mutex);
     int i = 0;
 	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 	{
@@ -33,6 +35,7 @@ Item* ItemCollection::get(int num)
 
 void ItemCollection::removeItem(Item* i)
 {
+	mutex::scoped_lock lock(iteration_mutex);
 	if (i == NULL)
 		return;
 
@@ -64,6 +67,14 @@ void ItemCollection::drawAll()
 			(*pos)->drawBBox();
 		}
 		(*pos)->draw();
+	}
+}
+
+void ItemCollection::calculateAll()
+{
+	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	{
+		(*pos)->tick();
 	}
 }
 
@@ -132,12 +143,14 @@ int ItemCollection::length()
 	return items.size();
 }
 
-list<Item*>::iterator ItemCollection::getBeginIterator()
+GLdouble ItemCollection::getCollision(Item* item_a, Item* item_b)
 {
-	return items.begin();
+	mutex::scoped_lock lock(collisions_mutex);
+	return collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))];
 }
 
-list<Item*>::iterator ItemCollection::getEndIterator()
+void ItemCollection::setCollision(Item* item_a, Item* item_b, GLdouble value)
 {
-	return items.end();
+	mutex::scoped_lock lock(collisions_mutex);
+	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = value;
 }

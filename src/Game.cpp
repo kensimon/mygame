@@ -84,10 +84,7 @@ void Game::physicsLoop()
 	phys_wait.wait(lock);
 	while (!phys_thread_stoprequested)
 	{
-		for (std::list<Item*>::iterator pos = ic->getBeginIterator(); pos != ic->getEndIterator(); ++pos)
-		{
-			(*pos)->tick();
-		}
+		instance->ic->calculateAll();
 		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, framewait));
 	}
 }
