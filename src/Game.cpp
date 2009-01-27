@@ -10,12 +10,13 @@
 Game* Game::instance = NULL;
 
 Game::Game() :
-read_mutex(), stdout_mutex(), phys_thread_stoprequested(false),
+phys_thread_stoprequested(false),
+read_mutex(), stdout_mutex(), phys_mutex(),
 phys_thread(boost::bind(&Game::physicsLoop, this))
 {
     ic = new ItemCollection();
     drawBBoxes = false;
-    framewait = 16;
+    framewait = 16666; //60 frames per second
     curbutton = 0;
     width = WINSIZE_X;
     height = WINSIZE_Y;
@@ -26,8 +27,8 @@ phys_thread(boost::bind(&Game::physicsLoop, this))
 
 Game::~Game()
 {
-	phys_thread_stoprequested = true;
-	phys_thread.join();
+	//phys_thread_stoprequested = true;
+	//phys_thread.join();
 };
 
 Game* Game::getInstance()
@@ -53,8 +54,10 @@ int Game::init(int argc, char **argv)
     glutMouseFunc(Game::mouse);
     glutKeyboardFunc(Game::keyboardFunc);
     glutSpecialFunc(Game::specialFunc);
-    glutTimerFunc(Game::framewait, Game::drawTimerCallback, 0);
+    glutTimerFunc(0, Game::drawTimerCallback, 0);
     glutMotionFunc(Game::dragMouse);
+	phys_thread_stoprequested = false;
+	phys_wait.notify_all();
     glutMainLoop();
     return 0;
 }
@@ -64,7 +67,7 @@ void Game::drawTimerCallback(int)
 	if (instance->isRendering)
 		return;
 	instance->isRendering = true;
-	glutTimerFunc(instance->framewait, Game::drawTimerCallback, 0);
+	glutTimerFunc(0, Game::drawTimerCallback, 0);
 	/* Start timer functions here */
     Game::display();
     GLenum error = glGetError();
@@ -77,13 +80,15 @@ void Game::drawTimerCallback(int)
 
 void Game::physicsLoop()
 {
+	mutex::scoped_lock lock(phys_mutex);
+	phys_wait.wait(lock);
 	while (!phys_thread_stoprequested)
 	{
 		for (std::list<Item*>::iterator pos = ic->getBeginIterator(); pos != ic->getEndIterator(); ++pos)
 		{
 			(*pos)->tick();
 		}
-		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, framewait * 1000));
+		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, framewait));
 	}
 }
 

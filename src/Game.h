@@ -21,6 +21,7 @@ class Game
         int getWidth();
 		bool getGravityOn();
 		mutex stdout_mutex;
+		bool phys_thread_stoprequested;
 
     private:
         static void display();
@@ -39,8 +40,9 @@ class Game
         int height;
 		mutex read_mutex;
 		bool gravityOn;
-		boost::thread phys_thread;
-		bool phys_thread_stoprequested;
+		mutex phys_mutex;
+		boost::condition_variable phys_wait;
+		thread phys_thread;
 
 
     protected:
