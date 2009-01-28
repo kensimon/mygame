@@ -29,7 +29,10 @@ public:
 	void removeItem(int num);
     int length();
 	Item* getSelected();
-	list<Item*>::iterator getEnd() { return items.end(); }
+	list<Item*>::iterator getEnd() {
+		list<Item*>::iterator it = items.end();
+		return it;
+	}
 	list<Item*>::iterator getBegin() { return items.begin(); }
 	void setCollision(Item* item_a, Item* item_b, GLdouble);
 	pair<bool, GLdouble> getCollision(Item* item_a, Item* item_b);
@@ -60,6 +63,8 @@ public:
 		items(coll)
 	{
 		base_item = baseItem;
+		if (*this == baseItem)
+			items_iterator++;
 	}
 
 	Item* operator* ()
@@ -85,7 +90,12 @@ public:
 	
 	bool operator==( const list<Item*>::iterator& other)
 	{
-		return ((*(*this)) == (*other));
+		return (items_iterator == other);
+	}
+
+	bool operator==( const Item* other )
+	{
+		return ((*items_iterator) == other);
 	}
 
 	bool operator!=( const collision_iterator& other)
@@ -100,6 +110,9 @@ public:
 
 	collision_iterator& operator++ ()
 	{
+		if (items_iterator == items.getEnd())
+			return *this;
+		++items_iterator;
 		while (
 			items_iterator != items.getEnd() &&
 			(
@@ -112,7 +125,7 @@ public:
 		{
 			++items_iterator;
 		}
-		return (*this);
+		return *this;
 	}
 };
 

@@ -80,6 +80,9 @@ void ItemCollection::calculateAll()
 
 void ItemCollection::select(GLdouble x, GLdouble y)
 {
+	if (items.size() == 0)
+		return;
+
     Item* cur;
     bool done = false;
 	

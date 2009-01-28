@@ -297,10 +297,10 @@ void Item::work()
 			pos != items->getEnd(); ++pos)
 		{
 			BBox* otherbbox = &((*pos)->bbox);
-			if (otherbbox->max_objx > bbox.min_objx &&
-				otherbbox->min_objx < bbox.max_objx &&
-				otherbbox->max_objy > bbox.min_objy &&
-				otherbbox->min_objy > bbox.max_objy)
+			if (otherbbox->max_x > bbox.min_x &&
+				otherbbox->min_x < bbox.max_x &&
+				otherbbox->max_y > bbox.min_y &&
+				otherbbox->min_y < bbox.max_y)
 			{
 				mutex::scoped_lock lock(Game::getInstance()->stdout_mutex);
 				std::cout << "COLLIDE!" << std::endl;
