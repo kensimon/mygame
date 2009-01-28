@@ -290,5 +290,21 @@ void Item::work()
 		if (instance->getGravityOn() && fabs(bbox.max_y) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
 				momentumX *= floor_friction;
+
+		//Collishin Detectshun!
+		ItemCollection* items = Game::getInstance()->getItemCollection();
+		for (collision_iterator pos(*items, this);
+			pos != items->getEnd(); ++pos)
+		{
+			BBox* otherbbox = &((*pos)->bbox);
+			if (otherbbox->max_objx > bbox.min_objx &&
+				otherbbox->min_objx < bbox.max_objx &&
+				otherbbox->max_objy > bbox.min_objy &&
+				otherbbox->min_objy > bbox.max_objy)
+			{
+				mutex::scoped_lock lock(Game::getInstance()->stdout_mutex);
+				std::cout << "COLLIDE!" << std::endl;
+			}
+		}
 	}
 }

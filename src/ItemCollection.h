@@ -29,15 +29,17 @@ public:
 	void removeItem(int num);
     int length();
 	Item* getSelected();
+	list<Item*>::iterator getEnd() { return items.end(); }
+	list<Item*>::iterator getBegin() { return items.begin(); }
 	void setCollision(Item* item_a, Item* item_b, GLdouble);
-	GLdouble getCollision(Item* item_a, Item* item_b);
+	pair<bool, GLdouble> getCollision(Item* item_a, Item* item_b);
 
 private:
 	Item* selected;
 	list<Item*> items;
 	void timerCallback();
-	map<pair<Item*, Item*>, GLdouble> collisions;
-	map<pair<Item*, Item*>, mutex> mutexes;
+	map<pair<Item*, Item*>, pair<bool, GLdouble>> collisions;
+	map<pair<Item*, Item*>, pair<bool, mutex>> mutexes;
 	mutex collisions_mutex;
 	mutex iteration_mutex;
 };
@@ -51,6 +53,8 @@ protected:
 	Item* base_item;
 	std::list<Item*>::iterator items_iterator;
 
+public:
+
 	explicit collision_iterator(ItemCollection& coll, Item* baseItem)
 		: items_iterator(items.items.begin()),
 		items(coll)
@@ -60,7 +64,7 @@ protected:
 
 	Item* operator* ()
 	{
-		return *items_iterator;
+		return (*items_iterator);
 	}
 
 	Item* operator-> ()
@@ -76,12 +80,39 @@ protected:
 
 	bool operator==( const collision_iterator& other)
 	{
-		return ( items.items == other.items.items );
+		return (*(items_iterator) == *(other.items_iterator));
+	}
+	
+	bool operator==( const list<Item*>::iterator& other)
+	{
+		return ((*(*this)) == (*other));
 	}
 
 	bool operator!=( const collision_iterator& other)
 	{
-		return (!((*this) == other));
+		return !(*this == other);
+	}
+	
+	bool operator!=( const list<Item*>::iterator& other)
+	{
+		return !(*this == other);
+	}
+
+	collision_iterator& operator++ ()
+	{
+		while (
+			items_iterator != items.getEnd() &&
+			(
+				*items_iterator == base_item ||
+				items.collisions.find(
+					std::make_pair(max(base_item, *items_iterator), min(base_item, *items_iterator))
+				) == items.collisions.end()
+			)
+		)
+		{
+			++items_iterator;
+		}
+		return (*this);
 	}
 };
 

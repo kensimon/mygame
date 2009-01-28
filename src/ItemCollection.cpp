@@ -143,7 +143,7 @@ int ItemCollection::length()
 	return items.size();
 }
 
-GLdouble ItemCollection::getCollision(Item* item_a, Item* item_b)
+pair<bool, GLdouble> ItemCollection::getCollision(Item* item_a, Item* item_b)
 {
 	mutex::scoped_lock lock(collisions_mutex);
 	return collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))];
@@ -152,5 +152,5 @@ GLdouble ItemCollection::getCollision(Item* item_a, Item* item_b)
 void ItemCollection::setCollision(Item* item_a, Item* item_b, GLdouble value)
 {
 	mutex::scoped_lock lock(collisions_mutex);
-	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = value;
+	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = std::make_pair(true, value);
 }
