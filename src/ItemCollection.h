@@ -41,8 +41,8 @@ private:
 	Item* selected;
 	list<Item*> items;
 	void timerCallback();
-	map<pair<Item*, Item*>, pair<bool, GLdouble>> collisions;
-	map<pair<Item*, Item*>, pair<bool, mutex>> mutexes;
+	map<pair<Item*, Item*>, pair<bool, GLdouble> > collisions;
+	map<pair<Item*, Item*>, pair<bool, mutex> > mutexes;
 	mutex collisions_mutex;
 	mutex iteration_mutex;
 };
