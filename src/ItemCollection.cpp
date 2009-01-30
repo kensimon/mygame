@@ -14,6 +14,11 @@ ItemCollection::~ItemCollection()
 {
 }
 
+list<Item*>::iterator ItemCollection::end()
+{
+	return items.end();
+}
+
 void ItemCollection::push(Item* n)
 {
 	items.push_back(n);
@@ -21,7 +26,6 @@ void ItemCollection::push(Item* n)
 
 Item* ItemCollection::get(int num)
 {
-	mutex::scoped_lock lock(iteration_mutex);
     int i = 0;
 	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 	{
@@ -70,11 +74,16 @@ void ItemCollection::drawAll()
 	}
 }
 
-void ItemCollection::calculateAll()
+void ItemCollection::startCalculating(int interval, bool* stoprequested)
 {
-	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	while (!(*stoprequested))
 	{
-		(*pos)->tick();
+		mutex::scoped_lock lock(iteration_mutex);
+		for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+		{
+			(*pos)->tick();
+		}
+		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, interval));
 	}
 }
 
@@ -156,4 +165,15 @@ void ItemCollection::setCollision(Item* item_a, Item* item_b, GLdouble value)
 {
 	mutex::scoped_lock lock(collisions_mutex);
 	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = std::make_pair(true, value);
+}
+
+mutex* ItemCollection::getCollisionMutex(Item *item_a, Item *item_b)
+{
+	mutex::scoped_lock lock(getmutex_mutex);
+	pair<Item*, Item*> pair = std::make_pair(max(item_a, item_b), min(item_a, item_b));
+	if (mutexes[pair] == NULL)
+	{
+		mutexes[pair] = new mutex();
+	}
+	return mutexes[pair];
 }

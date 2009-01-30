@@ -2,7 +2,7 @@
 #include "Game.h"
 #include <iostream>
 
-Item::Item()
+Item::Item(ItemType type)
 : thread_stoprequested(false),
 tick_thread(boost::bind(&Item::work, this)),
 elasticity(.9),
@@ -10,6 +10,7 @@ floor_friction(.99),
 bbox(0,0,0,0)
 {
 	instance = Game::getInstance();
+	item_type = type;
     x = 0;
     y = 0;
     degrees = 0;
@@ -194,6 +195,42 @@ void Item::work()
 			return;
 		}
 
+		//Collishin Detectshun!
+		ItemCollection* items = Game::getInstance()->getItemCollection();
+		for (collision_iterator pos(*items, this);
+			pos != items->end(); ++pos)
+		{
+			mutex* m = items->getCollisionMutex(this, *pos);
+			if (mutex::scoped_try_lock(*m))
+			{
+				BBox* otherbbox = &((*pos)->bbox);
+				if (otherbbox->max_x > bbox.min_x &&
+					otherbbox->min_x < bbox.max_x &&
+					otherbbox->max_y > bbox.min_y &&
+					otherbbox->min_y < bbox.max_y)
+				{
+					Item* otheritem = *pos;
+					items->setCollision(this, otheritem, 0);
+					if (otheritem->item_type == CircleType && item_type == CircleType)
+					{
+						this->red = 0;
+						/*GLdouble oldmomentumX = momentumX;
+						GLdouble oldmomentumY = momentumY;
+						momentumX += otheritem->momentumX;
+						momentumY += otheritem->momentumY;
+						otheritem->momentumX += oldmomentumX;
+						otheritem->momentumY += oldmomentumY;*/
+					}
+					mutex::scoped_lock lock(Game::getInstance()->stdout_mutex);
+					std::cout << "COLLIDE!" << std::endl;
+				}
+				else
+				{
+					this->red = 1;
+				}
+			}
+		}
+
 		degrees += spinMomentum;
 		if (degrees > 360.0)
 			degrees -= 360.0;
@@ -290,21 +327,5 @@ void Item::work()
 		if (instance->getGravityOn() && fabs(bbox.max_y) >= instance->getHeight() - GRAVITY &&
 				momentumY == 0)
 				momentumX *= floor_friction;
-
-		//Collishin Detectshun!
-		ItemCollection* items = Game::getInstance()->getItemCollection();
-		for (collision_iterator pos(*items, this);
-			pos != items->getEnd(); ++pos)
-		{
-			BBox* otherbbox = &((*pos)->bbox);
-			if (otherbbox->max_x > bbox.min_x &&
-				otherbbox->min_x < bbox.max_x &&
-				otherbbox->max_y > bbox.min_y &&
-				otherbbox->min_y < bbox.max_y)
-			{
-				mutex::scoped_lock lock(Game::getInstance()->stdout_mutex);
-				std::cout << "COLLIDE!" << std::endl;
-			}
-		}
 	}
 }

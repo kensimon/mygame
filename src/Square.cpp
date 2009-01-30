@@ -2,6 +2,7 @@
 #include "Square.h"
 
 Square::Square(int xpos, int ypos, int objsize)
+: Item(SquareType)
 {
     x = xpos;
     y = ypos;

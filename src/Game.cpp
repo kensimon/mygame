@@ -82,11 +82,7 @@ void Game::physicsLoop()
 {
 	mutex::scoped_lock lock(phys_mutex);
 	phys_wait.wait(lock);
-	while (!phys_thread_stoprequested)
-	{
-		instance->ic->calculateAll();
-		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, framewait));
-	}
+	instance->ic->startCalculating(framewait, &phys_thread_stoprequested);
 }
 
 void Game::display()

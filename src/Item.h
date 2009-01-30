@@ -24,6 +24,12 @@ using boost::mutex;
 
 class Game;
 
+
+enum ItemType
+{
+	SquareType, CircleType
+};
+
 class BBox
 {
     public:
@@ -50,7 +56,6 @@ class BBox
 class Item
 {
     public:
-        Item();
         virtual ~Item();
         void resize(GLdouble x);
         void setMass(GLdouble newMass);
@@ -73,6 +78,7 @@ class Item
 		void tick();
 
     protected:
+        Item(ItemType type);
         virtual void updateBBox();
         GLdouble x;
         GLdouble y;
@@ -103,6 +109,7 @@ class Item
 		void work();
 		thread tick_thread;
 		Game* instance;
+		ItemType item_type;
 };
 
 #endif

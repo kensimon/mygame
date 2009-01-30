@@ -23,28 +23,26 @@ public:
     Item* get(int num);
 	void pop();
 	void drawAll();
-	void calculateAll();
+	void startCalculating(int interval, bool* stoprequested);
 	void select(GLdouble x, GLdouble y);
 	void removeItem(Item* i);
 	void removeItem(int num);
     int length();
 	Item* getSelected();
-	list<Item*>::iterator getEnd() {
-		list<Item*>::iterator it = items.end();
-		return it;
-	}
-	list<Item*>::iterator getBegin() { return items.begin(); }
 	void setCollision(Item* item_a, Item* item_b, GLdouble);
 	pair<bool, GLdouble> getCollision(Item* item_a, Item* item_b);
+	mutex* getCollisionMutex(Item* item_a, Item* item_b);
+	list<Item*>::iterator end();
 
 private:
 	Item* selected;
 	list<Item*> items;
 	void timerCallback();
 	map<pair<Item*, Item*>, pair<bool, GLdouble> > collisions;
-	map<pair<Item*, Item*>, pair<bool, mutex> > mutexes;
+	map<pair<Item*, Item*>, mutex* > mutexes;
 	mutex collisions_mutex;
 	mutex iteration_mutex;
+	mutex getmutex_mutex; //seriously.
 };
 
 class collision_iterator
@@ -110,11 +108,11 @@ public:
 
 	collision_iterator& operator++ ()
 	{
-		if (items_iterator == items.getEnd())
+		if (items_iterator == items.items.end())
 			return *this;
 		++items_iterator;
 		while (
-			items_iterator != items.getEnd() &&
+			items_iterator != items.items.end() &&
 			(
 				*items_iterator == base_item ||
 				items.collisions.find(
