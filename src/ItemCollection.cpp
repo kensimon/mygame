@@ -3,8 +3,7 @@
 #include "Game.h"
 #include <iostream>
 
-ItemCollection::ItemCollection() :
-collisions_mutex()
+ItemCollection::ItemCollection()
 {
 	selected = NULL;
 }
@@ -21,6 +20,8 @@ list<Item*>::iterator ItemCollection::end()
 
 void ItemCollection::push(Item* n)
 {
+	mutex::scoped_lock lock(addremove_mutex);
+	scoped_write_lock wlock(readwrite_mutex);
 	items.push_back(n);
 }
 
@@ -39,10 +40,15 @@ Item* ItemCollection::get(int num)
 
 void ItemCollection::removeItem(Item* i)
 {
-	mutex::scoped_lock lock(iteration_mutex);
 	if (i == NULL)
 		return;
 
+	mutex::scoped_lock lock(addremove_mutex);
+	i->thread_stoprequested = true;
+	{ //just acquire and release the write lock... in case the object thread is waiting on a read lock, 
+	  //we need to let it continue so it can gracefully stop.
+		scoped_write_lock wlock(readwrite_mutex);
+	}
 	i->stop();
 	items.remove(i);
 	delete i;
@@ -74,14 +80,22 @@ void ItemCollection::drawAll()
 	}
 }
 
-void ItemCollection::startCalculating(int interval, bool* stoprequested)
+boost::shared_mutex* ItemCollection::getReadWriteMutex()
+{
+	return &readwrite_mutex;
+}
+
+void ItemCollection::calculationLoop(int interval, bool* stoprequested)
 {
 	while (!(*stoprequested))
 	{
-		mutex::scoped_lock lock(iteration_mutex);
-		for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 		{
-			(*pos)->tick();
+			mutex::scoped_lock lock(addremove_mutex); //high-contention lock for adding and removing
+			scoped_read_lock readlock(readwrite_mutex); //low-contention lock for tick()'ing threads
+			for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+			{
+				(*pos)->tick();
+			}
 		}
 		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, interval));
 	}
@@ -137,6 +151,9 @@ void ItemCollection::select(GLdouble x, GLdouble y)
 	//Move selected to the back, so it gets rendered on top.
 	if (selected != NULL)
     {
+		//We have to acqure a lock to make sure no threads are still working while we re-arrange the items.
+		mutex::scoped_lock lock(addremove_mutex);
+		scoped_write_lock wlock(readwrite_mutex);
 		items.remove(selected);
 		items.push_back(selected);
     }
@@ -157,13 +174,11 @@ int ItemCollection::length()
 
 pair<bool, GLdouble> ItemCollection::getCollision(Item* item_a, Item* item_b)
 {
-	mutex::scoped_lock lock(collisions_mutex);
 	return collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))];
 }
 
 void ItemCollection::setCollision(Item* item_a, Item* item_b, GLdouble value)
 {
-	mutex::scoped_lock lock(collisions_mutex);
 	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = std::make_pair(true, value);
 }
 
@@ -171,9 +186,9 @@ mutex* ItemCollection::getCollisionMutex(Item *item_a, Item *item_b)
 {
 	mutex::scoped_lock lock(getmutex_mutex);
 	pair<Item*, Item*> pair = std::make_pair(max(item_a, item_b), min(item_a, item_b));
-	if (mutexes[pair] == NULL)
+	if (collision_mutexes[pair] == NULL)
 	{
-		mutexes[pair] = new mutex();
+		collision_mutexes[pair] = new mutex();
 	}
-	return mutexes[pair];
+	return collision_mutexes[pair];
 }

@@ -1,6 +1,7 @@
 #ifndef __ITEMCOLLECTION_H
 #define __ITEMCOLLECTION_H
 #include "Item.h"
+#include "scoped_rw_lock.h"
 #include <list>
 #include <map>
 #include <iterator>
@@ -23,26 +24,27 @@ public:
     Item* get(int num);
 	void pop();
 	void drawAll();
-	void startCalculating(int interval, bool* stoprequested);
+	void calculationLoop(int interval, bool* stoprequested);
 	void select(GLdouble x, GLdouble y);
 	void removeItem(Item* i);
 	void removeItem(int num);
     int length();
+	list<Item*>::iterator end();
 	Item* getSelected();
 	void setCollision(Item* item_a, Item* item_b, GLdouble);
 	pair<bool, GLdouble> getCollision(Item* item_a, Item* item_b);
 	mutex* getCollisionMutex(Item* item_a, Item* item_b);
-	list<Item*>::iterator end();
+	boost::shared_mutex* getReadWriteMutex();
 
 private:
 	Item* selected;
 	list<Item*> items;
 	void timerCallback();
 	map<pair<Item*, Item*>, pair<bool, GLdouble> > collisions;
-	map<pair<Item*, Item*>, mutex* > mutexes;
-	mutex collisions_mutex;
-	mutex iteration_mutex;
+	map<pair<Item*, Item*>, mutex* > collision_mutexes;
 	mutex getmutex_mutex; //seriously.
+	mutex addremove_mutex;
+	boost::shared_mutex readwrite_mutex;
 };
 
 class collision_iterator

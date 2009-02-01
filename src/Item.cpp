@@ -186,6 +186,7 @@ void Item::tick()
 
 void Item::work()
 {
+	ItemCollection* items = Game::getInstance()->getItemCollection();
 	while (!thread_stoprequested)
 	{
 		mutex::scoped_lock lock(tick_mutex);
@@ -194,9 +195,12 @@ void Item::work()
 		{
 			return;
 		}
-
+		scoped_read_lock rlock(*(items->getReadWriteMutex()));
+		if (thread_stoprequested) //the deletion thread may be what released the write lock.
+		{
+			return;
+		}
 		//Collishin Detectshun!
-		ItemCollection* items = Game::getInstance()->getItemCollection();
 		for (collision_iterator pos(*items, this);
 			pos != items->end(); ++pos)
 		{

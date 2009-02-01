@@ -8,6 +8,7 @@
 #include <boost/bind.hpp>
 
 #include "Config.h"
+#include "scoped_rw_lock.h"
 
 #define PI 3.1415926535
 
@@ -53,8 +54,12 @@ class BBox
     }
 };
 
+class ItemCollection; //forward declaration
+
+
 class Item
 {
+	friend class ItemCollection;
     public:
         virtual ~Item();
         void resize(GLdouble x);
@@ -104,12 +109,12 @@ class Item
 		GLint viewport[4];
 		boost::condition_variable wait_variable;
         BBox bbox;
-		bool thread_stoprequested;
 		boost::mutex tick_mutex;
 		void work();
 		thread tick_thread;
 		Game* instance;
 		ItemType item_type;
+		bool thread_stoprequested;
 };
 
 #endif

@@ -94,7 +94,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-gd-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-gd-1_36.dll&quot; &quot;$(TargetDir)&quot;"
+				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-gd-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-gd-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -173,7 +173,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;"
+				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -233,6 +233,10 @@
 			</File>
 			<File
 				RelativePath=".\src\ItemCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\scoped_rw_lock.h"
 				>
 			</File>
 			<File
