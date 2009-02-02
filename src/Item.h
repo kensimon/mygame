@@ -111,7 +111,7 @@ class Item
         BBox bbox;
 		boost::mutex tick_mutex;
 		void work();
-		thread tick_thread;
+		thread* tick_thread;
 		Game* instance;
 		ItemType item_type;
 		bool thread_stoprequested;

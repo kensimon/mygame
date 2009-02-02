@@ -4,9 +4,7 @@
 
 Item::Item(ItemType type)
 : thread_stoprequested(false),
-tick_thread(boost::bind(&Item::work, this)),
-elasticity(.9),
-floor_friction(.99),
+tick_thread(NULL),
 bbox(0,0,0,0)
 {
 	instance = Game::getInstance();
@@ -21,6 +19,9 @@ bbox(0,0,0,0)
     blue = 1.0;
     momentumX = 0;
     momentumY = 0;
+
+	elasticity = .9;
+	floor_friction = .99;
 
     //Can't think of anywhere better to put them.
     //They should get moved the first time they're drawn.
@@ -42,15 +43,16 @@ bbox(0,0,0,0)
 Item::~Item()
 {
 	stop();
+	delete tick_thread;
 }
 
 void Item::stop()
 {
-	if (tick_thread.joinable())
+	if (tick_thread->joinable())
 	{
 		thread_stoprequested = true;
 		wait_variable.notify_all();
-		tick_thread.join();
+		tick_thread->join();
 	}
 }
 
@@ -181,6 +183,10 @@ void Item::updateBBox()
 
 void Item::tick()
 {
+	if (tick_thread == NULL)
+	{
+		tick_thread = new boost::thread(boost::bind(&Item::work, this));
+	}
 	wait_variable.notify_all();
 }
 
@@ -200,6 +206,7 @@ void Item::work()
 		{
 			return;
 		}
+
 		//Collishin Detectshun!
 		for (collision_iterator pos(*items, this);
 			pos != items->end(); ++pos)
