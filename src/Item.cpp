@@ -14,23 +14,14 @@ bbox(0,0,0,0)
     degrees = 0;
     spinMomentum = 0;
     size = 0;
-    red = 1.0;
-    green = 1.0;
-    blue = 1.0;
+    red = orig_red = 1.0;
+    green = orig_green = 1.0;
+    blue = orig_blue = 1.0;
     momentumX = 0;
     momentumY = 0;
 
 	elasticity = .9;
 	floor_friction = .99;
-
-    //Can't think of anywhere better to put them.
-    //They should get moved the first time they're drawn.
-    objx = 0;
-    objy = 0;
-	objz = 0;
-    objsizex = 0;
-    objsizey = 0;
-    objsizez = 0;
 
     mass = 1;
 
@@ -43,12 +34,13 @@ bbox(0,0,0,0)
 Item::~Item()
 {
 	stop();
-	delete tick_thread;
+	if (tick_thread != NULL)
+		delete tick_thread;
 }
 
 void Item::stop()
 {
-	if (tick_thread->joinable())
+	if (tick_thread != NULL && tick_thread->joinable())
 	{
 		thread_stoprequested = true;
 		wait_variable.notify_all();
@@ -166,6 +158,13 @@ void Item::setColor(GLdouble red, GLdouble green, GLdouble blue)
     this->blue = blue;
 }
 
+void Item::resetColor()
+{
+	red = orig_red;
+	blue = orig_blue;
+	green = orig_green;
+}
+
 GLdouble Item::getMass()
 {
     return mass;
@@ -198,14 +197,11 @@ void Item::work()
 		mutex::scoped_lock lock(tick_mutex);
 		wait_variable.wait(lock);
 		if (thread_stoprequested) //the destructor also calls notify_all(), so if we're being destructed, quit now.
-		{
 			return;
-		}
+
 		scoped_read_lock rlock(*(items->getReadWriteMutex()));
-		if (thread_stoprequested) //the deletion thread may be what released the write lock.
-		{
+		if (thread_stoprequested) //the deleter thread could be what released the lock
 			return;
-		}
 
 		//Collishin Detectshun!
 		for (collision_iterator pos(*items, this);
@@ -225,6 +221,7 @@ void Item::work()
 					if (otheritem->item_type == CircleType && item_type == CircleType)
 					{
 						this->red = 0;
+						otheritem->red = 0;
 						/*GLdouble oldmomentumX = momentumX;
 						GLdouble oldmomentumY = momentumY;
 						momentumX += otheritem->momentumX;

@@ -9,14 +9,10 @@
 
 Game* Game::instance = NULL;
 
-Game::Game() :
-phys_thread_stoprequested(false),
-read_mutex(), stdout_mutex(), phys_mutex(),
-phys_thread(boost::bind(&Game::physicsLoop, this))
+Game::Game()
 {
-    ic = new ItemCollection();
     drawBBoxes = false;
-    framewait = 16666; //60 frames per second
+    ic = new ItemCollection(16666);
     curbutton = 0;
     width = WINSIZE_X;
     height = WINSIZE_Y;
@@ -27,8 +23,7 @@ phys_thread(boost::bind(&Game::physicsLoop, this))
 
 Game::~Game()
 {
-	//phys_thread_stoprequested = true;
-	//phys_thread.join();
+	ic->stopCalculating();
 };
 
 Game* Game::getInstance()
@@ -56,8 +51,7 @@ int Game::init(int argc, char **argv)
     glutSpecialFunc(Game::specialFunc);
     glutTimerFunc(0, Game::drawTimerCallback, 0);
     glutMotionFunc(Game::dragMouse);
-	phys_thread_stoprequested = false;
-	phys_wait.notify_all();
+	ic->startCalculating();
     glutMainLoop();
     return 0;
 }
@@ -76,13 +70,6 @@ void Game::drawTimerCallback(int)
 
 	/* End timer functions here */
 	instance->isRendering = false;
-}
-
-void Game::physicsLoop()
-{
-	mutex::scoped_lock lock(phys_mutex);
-	phys_wait.wait(lock);
-	instance->ic->calculationLoop(framewait, &phys_thread_stoprequested);
 }
 
 void Game::display()
@@ -145,6 +132,14 @@ void Game::keyboardFunc(unsigned char key, int, int)
         case 'l':
             instance->ic->removeItem(instance->ic->length() - 1);
             break;
+		case 's':
+			{
+				if (instance->ic->isCalculationStopped())
+					instance->ic->startCalculating();
+				else
+					instance->ic->stopCalculating();
+				break;
+			}
         case '0':
             instance->ic->removeItem(0);
             break;

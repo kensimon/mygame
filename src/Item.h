@@ -73,6 +73,7 @@ class Item
         GLdouble getRotation();
         GLdouble getSize();
         void setColor(GLdouble red, GLdouble green, GLdouble blue);
+		void resetColor();
         GLdouble momentumX;
         GLdouble momentumY;
         GLdouble getMass();
@@ -97,6 +98,9 @@ class Item
         GLdouble red;
         GLdouble blue;
         GLdouble green;
+		GLdouble orig_red;
+		GLdouble orig_blue;
+		GLdouble orig_green;
         GLdouble degrees;
         GLdouble size;
         GLdouble mass;

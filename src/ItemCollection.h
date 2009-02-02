@@ -11,6 +11,7 @@ using std::list;
 using std::map;
 using std::pair;
 using boost::mutex;
+using boost::thread;
 
 class collision_iterator; //forward declaration
 
@@ -18,13 +19,13 @@ class ItemCollection
 {
 	friend class collision_iterator;
 public:
-	ItemCollection();
+	ItemCollection(int framewait);
 	~ItemCollection();
 	void push(Item* i);
     Item* get(int num);
 	void pop();
 	void drawAll();
-	void calculationLoop(int interval, bool* stoprequested);
+	void calculationLoop();
 	void select(GLdouble x, GLdouble y);
 	void removeItem(Item* i);
 	void removeItem(int num);
@@ -35,6 +36,10 @@ public:
 	pair<bool, GLdouble> getCollision(Item* item_a, Item* item_b);
 	mutex* getCollisionMutex(Item* item_a, Item* item_b);
 	boost::shared_mutex* getReadWriteMutex();
+	void stopCalculating();
+	void startCalculating();
+	bool isCalculationStopped();
+	int framewait;
 
 private:
 	Item* selected;
@@ -45,6 +50,8 @@ private:
 	mutex getmutex_mutex; //seriously.
 	mutex addremove_mutex;
 	boost::shared_mutex readwrite_mutex;
+	bool phys_stoprequested;
+	thread* phys_thread;
 };
 
 class collision_iterator

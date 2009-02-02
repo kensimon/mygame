@@ -1,12 +1,12 @@
 #include "Game.h"
 #include "Square.h"
 
-Square::Square(int xpos, int ypos, int objsize)
+Square::Square(int xpos, int ypos, int itemsize)
 : Item(SquareType)
 {
     x = xpos;
     y = ypos;
-    size = objsize;
+    size = itemsize;
     degrees = 0;
 	floor_friction = 0.75;
 	elasticity = 0.75;

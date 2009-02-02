@@ -8,12 +8,6 @@ Circle::Circle(int xpos, int ypos, int itemsize)
     y = ypos;
     size = itemsize;
     degrees = 0;
-    objx = 0;
-    objy = 0;
-    objz = 0;
-    objsizex = 0;
-    objsizey = 0;
-    objsizez = 0;
     quad = gluNewQuadric();
 	floor_friction = 0.99;
 	elasticity = 0.9;

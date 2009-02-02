@@ -6,7 +6,6 @@
 #include <boost/thread.hpp>
 
 using boost::mutex;
-using boost::thread;
 
 class Game
 {
@@ -21,7 +20,6 @@ class Game
         int getWidth();
 		bool getGravityOn();
 		mutex stdout_mutex;
-		bool phys_thread_stoprequested;
 
     private:
         static void display();
@@ -31,19 +29,13 @@ class Game
         static void specialFunc(int, int, int);
         static void drawTimerCallback(int);
         static void dragMouse(int, int);
-		void physicsLoop();
         static Game* instance;
         int curbutton;
-        int framewait;
         ItemCollection* ic;
         int width;
         int height;
 		mutex read_mutex;
 		bool gravityOn;
-		mutex phys_mutex;
-		boost::condition_variable phys_wait;
-		thread phys_thread;
-
 
     protected:
         Game();

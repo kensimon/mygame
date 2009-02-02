@@ -3,9 +3,11 @@
 #include "Game.h"
 #include <iostream>
 
-ItemCollection::ItemCollection()
+ItemCollection::ItemCollection(int framewait)
 {
 	selected = NULL;
+	phys_thread = NULL;
+	this->framewait = framewait;
 }
 
 
@@ -16,6 +18,34 @@ ItemCollection::~ItemCollection()
 list<Item*>::iterator ItemCollection::end()
 {
 	return items.end();
+}
+
+void ItemCollection::startCalculating()
+{
+	if (phys_thread == NULL)
+	{
+		phys_stoprequested = false;
+		phys_thread = new thread(boost::bind(&ItemCollection::calculationLoop, this)); //thread will start here.
+	}
+}
+
+void ItemCollection::stopCalculating()
+{
+	if (phys_thread != NULL)
+	{
+		phys_stoprequested = true;
+		if (phys_thread->joinable())
+		{
+			phys_thread->join();
+		}
+		delete phys_thread;
+		phys_thread = NULL;
+	}
+}
+
+bool ItemCollection::isCalculationStopped()
+{
+	return (phys_thread == NULL);
 }
 
 void ItemCollection::push(Item* n)
@@ -43,12 +73,13 @@ void ItemCollection::removeItem(Item* i)
 	if (i == NULL)
 		return;
 
-	mutex::scoped_lock lock(addremove_mutex);
 	i->thread_stoprequested = true;
-	{ //just acquire and release the write lock... in case the object thread is waiting on a read lock, 
-	  //we need to let it continue so it can gracefully stop.
-		scoped_write_lock wlock(readwrite_mutex);
-	}
+	mutex::scoped_lock lock(addremove_mutex); //make sure no more object threads are waked
+	
+	//wait until all object threads are asleep, then immediately relese the lock. that way,
+	//if the item to be deleted is waiting on a read lock, it will continue and gracefully quit.
+	{ scoped_write_lock wlock(readwrite_mutex); }
+	
 	i->stop();
 	items.remove(i);
 	delete i;
@@ -85,19 +116,22 @@ boost::shared_mutex* ItemCollection::getReadWriteMutex()
 	return &readwrite_mutex;
 }
 
-void ItemCollection::calculationLoop(int interval, bool* stoprequested)
+void ItemCollection::calculationLoop()
 {
-	while (!(*stoprequested))
+	while (!phys_stoprequested)
 	{
 		{
-			mutex::scoped_lock lock(addremove_mutex); //high-contention lock for adding and removing
-			scoped_read_lock readlock(readwrite_mutex); //low-contention lock for tick()'ing threads
+			mutex::scoped_lock lock(addremove_mutex); //Make sure we don't wake threads if objects are being added/removed
+			scoped_write_lock writelock(readwrite_mutex); //wait until all threads are done.
+
+			//wake up each thread.  Each one will be waiting for the above write lock to free.
 			for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 			{
 				(*pos)->tick();
 			}
-		}
-		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, interval));
+		} //<-- release write lock, threads will continue.
+
+		boost::this_thread::sleep(boost::posix_time::time_duration(0, 0, 0, framewait));
 	}
 }
 
@@ -127,7 +161,7 @@ void ItemCollection::select(GLdouble x, GLdouble y)
         {
 			if (selected != NULL) //de-color the previously selected item 
 			{
-				selected->setColor(1,1,1);
+				selected->resetColor();
 			}
             selected = cur;
         }
@@ -144,7 +178,7 @@ void ItemCollection::select(GLdouble x, GLdouble y)
     {
         // Select nothing.
 		if (selected != NULL)
-			selected->setColor(1,1,1);
+			selected->resetColor();
         selected = NULL;
     }
 
