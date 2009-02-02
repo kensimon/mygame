@@ -232,8 +232,6 @@ void Item::work()
 						otheritem->momentumX += oldmomentumX;
 						otheritem->momentumY += oldmomentumY;*/
 					}
-					mutex::scoped_lock lock(Game::getInstance()->stdout_mutex);
-					std::cout << "COLLIDE!" << std::endl;
 				}
 				else
 				{
