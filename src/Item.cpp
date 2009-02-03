@@ -194,8 +194,7 @@ void Item::work()
 	ItemCollection* items = Game::getInstance()->getItemCollection();
 	while (!thread_stoprequested)
 	{
-		mutex::scoped_lock lock(tick_mutex);
-		wait_variable.wait(lock);
+		{ mutex::scoped_lock lock(tick_mutex); wait_variable.wait(lock); } //wait for notification to continue.
 		if (thread_stoprequested) //the destructor also calls notify_all(), so if we're being destructed, quit now.
 			return;
 
