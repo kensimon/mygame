@@ -7,13 +7,34 @@
 #include <iterator>
 #include <boost/thread.hpp>
 
+#if WIN32
+#include <unordered_map>
+#elif __GNUC__
+#include <tr1/unordered_map>
+#endif
+
 using std::list;
 using std::map;
 using std::pair;
 using boost::mutex;
 using boost::thread;
+using std::tr1::unordered_map;
+using std::tr1::hash;
 
 class collision_iterator; //forward declaration
+
+//provide a hashing function for an Item* pair, useful for checking collisions.
+template <>
+class hash<pair<Item*, Item*> >
+{
+public:
+	size_t operator()(pair<Item*, Item*> thepair) const
+	{
+		return hasher_(thepair.first) + hasher_(thepair.second);
+	}
+private:
+	hash<Item*> hasher_;
+};
 
 class ItemCollection
 {
@@ -32,8 +53,8 @@ public:
     int length();
 	list<Item*>::iterator end();
 	Item* getSelected();
-	void setCollision(Item* item_a, Item* item_b, GLdouble);
-	pair<bool, GLdouble> getCollision(Item* item_a, Item* item_b);
+	bool getCollision(Item* item_a, Item* item_b);
+	void setCollision(Item* item_a, Item* item_b);
 	mutex* getCollisionMutex(Item* item_a, Item* item_b);
 	boost::shared_mutex* getReadWriteMutex();
 	void stopCalculating();
@@ -45,8 +66,8 @@ private:
 	Item* selected;
 	list<Item*> items;
 	void timerCallback();
-	map<pair<Item*, Item*>, pair<bool, GLdouble> > collisions;
-	map<pair<Item*, Item*>, mutex* > collision_mutexes;
+	unordered_map<pair<Item*, Item*>, bool> collisions;
+	unordered_map<pair<Item*, Item*>, mutex*> collision_mutexes;
 	mutex getmutex_mutex; //seriously.
 	mutex addremove_mutex;
 	boost::shared_mutex readwrite_mutex;
@@ -62,6 +83,7 @@ protected:
 	ItemCollection& items;
 	Item* base_item;
 	std::list<Item*>::iterator items_iterator;
+	std::pair<bool, GLdouble> blankpair;
 
 public:
 
@@ -119,21 +141,29 @@ public:
 	{
 		if (items_iterator == items.items.end())
 			return *this;
+
 		++items_iterator;
-		while (
-			items_iterator != items.items.end() &&
-			(
-				*items_iterator == base_item ||
-				items.collisions.find(
-					std::make_pair(max(base_item, *items_iterator), min(base_item, *items_iterator))
-				) != items.collisions.end()
-			)
-		)
+		while (items_iterator != items.items.end())
 		{
-			++items_iterator;
+			if (*items_iterator == base_item)
+			{
+				++items_iterator;
+				continue;
+			}
+
+			if (items.getCollision(base_item, *items_iterator) == false) //if we haven't calculated a collision for these two,
+			{
+				return *this; //use this item.
+			}
+			else
+			{
+				++items_iterator; //else, move onto the next one.
+				continue;
+			}
 		}
 		return *this;
 	}
 };
+
 
 #endif
