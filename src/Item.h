@@ -114,6 +114,7 @@ class Item
 		boost::condition_variable wait_variable;
         BBox bbox;
 		boost::mutex tick_mutex;
+		boost::mutex move_mutex;
 		void work();
 		thread* tick_thread;
 		Game* instance;

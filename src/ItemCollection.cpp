@@ -124,6 +124,8 @@ void ItemCollection::calculationLoop()
 			mutex::scoped_lock lock(addremove_mutex); //Make sure we don't wake threads if objects are being added/removed
 			scoped_write_lock writelock(readwrite_mutex); //wait until all threads are done.
 
+			collisions.clear();
+
 			//wake up each thread.  Each one will be waiting for the above write lock to free.
 			for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 			{
@@ -213,6 +215,7 @@ pair<bool, GLdouble> ItemCollection::getCollision(Item* item_a, Item* item_b)
 
 void ItemCollection::setCollision(Item* item_a, Item* item_b, GLdouble value)
 {
+	mutex::scoped_lock lock(getmutex_mutex);
 	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = std::make_pair(true, value);
 }
 

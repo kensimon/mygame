@@ -126,7 +126,7 @@ public:
 				*items_iterator == base_item ||
 				items.collisions.find(
 					std::make_pair(max(base_item, *items_iterator), min(base_item, *items_iterator))
-				) == items.collisions.end()
+				) != items.collisions.end()
 			)
 		)
 		{

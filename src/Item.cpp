@@ -220,14 +220,17 @@ void Item::work()
 					items->setCollision(this, otheritem, 0);
 					if (otheritem->item_type == CircleType && item_type == CircleType)
 					{
+						mutex::scoped_lock mlock(otheritem->move_mutex);
 						this->red = 0;
 						otheritem->red = 0;
-						/*GLdouble oldmomentumX = momentumX;
+#if 0
+						GLdouble oldmomentumX = momentumX;
 						GLdouble oldmomentumY = momentumY;
 						momentumX += otheritem->momentumX;
 						momentumY += otheritem->momentumY;
 						otheritem->momentumX += oldmomentumX;
-						otheritem->momentumY += oldmomentumY;*/
+						otheritem->momentumY += oldmomentumY;
+#endif
 					}
 				}
 				else
@@ -237,6 +240,7 @@ void Item::work()
 			}
 		}
 
+		mutex::scoped_lock mvlock(move_mutex);
 		degrees += spinMomentum;
 		if (degrees > 360.0)
 			degrees -= 360.0;
