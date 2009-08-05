@@ -15,5 +15,6 @@ config.sub
 *.vcproj.*.user
 mygame.ncb
 Debug
+Debug_Boost39
 Release
 build-stamp
