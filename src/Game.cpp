@@ -61,7 +61,7 @@ void Game::drawTimerCallback(int)
 	if (instance->isRendering)
 		return;
 	instance->isRendering = true;
-	glutTimerFunc(0, Game::drawTimerCallback, 0);
+	glutTimerFunc(16, Game::drawTimerCallback, 0);
 	/* Start timer functions here */
     Game::display();
     GLenum error = glGetError();
