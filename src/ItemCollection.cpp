@@ -3,6 +3,7 @@
 #include "Game.h"
 #include <iostream>
 
+
 ItemCollection::ItemCollection(int framewait)
 {
 	selected = NULL;
@@ -210,7 +211,7 @@ int ItemCollection::length()
 
 bool ItemCollection::getCollision(Item *item_a, Item *item_b)
 {
-	mutex::scoped_lock lock(*(getCollisionMutex(item_a, item_b)));
+	mutex::scoped_lock lock(check_collision_mutex);
 	std::pair<Item*, Item*> thepair = std::make_pair(max(item_a, item_b), min(item_a, item_b));
 	if (collisions.find(thepair) == collisions.end())
 	{
@@ -222,7 +223,7 @@ bool ItemCollection::getCollision(Item *item_a, Item *item_b)
 
 void ItemCollection::setCollision(Item* item_a, Item* item_b)
 {
-	mutex::scoped_lock lock(*(getCollisionMutex(item_a, item_b)));
+	mutex::scoped_lock lock(check_collision_mutex);
 	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = true;
 }
 

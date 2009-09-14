@@ -70,6 +70,7 @@ private:
 	unordered_map<pair<Item*, Item*>, mutex*> collision_mutexes;
 	mutex getmutex_mutex; //seriously.
 	mutex addremove_mutex;
+	mutex check_collision_mutex;
 	boost::shared_mutex readwrite_mutex;
 	bool phys_stoprequested;
 	thread* phys_thread;
