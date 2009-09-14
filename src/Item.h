@@ -82,9 +82,11 @@ class Item
         bool grabbed;
         int spinMomentum;
 		void tick();
+		void setItemId(int id);
+		int getItemId();
 
     protected:
-        Item(ItemType type);
+        Item(int id, ItemType type);
         virtual void updateBBox();
         GLdouble x;
         GLdouble y;
@@ -120,6 +122,7 @@ class Item
 		Game* instance;
 		ItemType item_type;
 		bool thread_stoprequested;
+		int itemId;
 };
 
 #endif

@@ -2,7 +2,7 @@
 #include "Game.h"
 #include <iostream>
 
-Item::Item(ItemType type)
+Item::Item(int id, ItemType type)
 : thread_stoprequested(false),
 tick_thread(NULL),
 bbox(0,0,0,0)
@@ -29,6 +29,7 @@ bbox(0,0,0,0)
     yclickpos = 0;
 
     grabbed = false;
+	itemId = id;
 }
 
 Item::~Item()
@@ -337,4 +338,14 @@ void Item::work()
 				momentumY == 0)
 				momentumX *= floor_friction;
 	}
+}
+
+void Item::setItemId(int id)
+{
+	itemId = id;
+}
+
+int Item::getItemId()
+{
+	return itemId;
 }

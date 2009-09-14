@@ -1,8 +1,8 @@
 #include "Game.h"
 #include "Square.h"
 
-Square::Square(int xpos, int ypos, int itemsize)
-: Item(SquareType)
+Square::Square(int id, int xpos, int ypos, int itemsize)
+: Item(id, SquareType)
 {
     x = xpos;
     y = ypos;

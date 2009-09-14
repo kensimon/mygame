@@ -1,8 +1,8 @@
 #include "Circle.h"
 #include "Game.h"
 
-Circle::Circle(int xpos, int ypos, int itemsize)
-: Item(CircleType)
+Circle::Circle(int id, int xpos, int ypos, int itemsize)
+: Item(id, CircleType)
 {
     x = xpos;
     y = ypos;

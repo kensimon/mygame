@@ -61,6 +61,7 @@ public:
 	void startCalculating();
 	bool isCalculationStopped();
 	int framewait;
+	int getNextItemId();
 
 private:
 	Item* selected;

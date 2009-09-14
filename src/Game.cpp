@@ -227,13 +227,13 @@ void Game::mouse(int button, int state, int x, int y)
             if (state == GLUT_DOWN)
             {
                 //instance->ic->getSelected()->moveTo(x, y);
-                instance->ic->push(new Circle(x, y));
+                instance->ic->push(new Circle(instance->ic->getNextItemId(), x, y));
             }
             break;
         case GLUT_MIDDLE_BUTTON:
             if (state == GLUT_DOWN)
             {
-                instance->ic->push(new Square(x, y));
+                instance->ic->push(new Square(instance->ic->getNextItemId(), x, y));
             }
         default:
             break;

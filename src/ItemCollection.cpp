@@ -83,6 +83,14 @@ void ItemCollection::removeItem(Item* i)
 	
 	i->stop();
 	items.remove(i);
+
+	int j = 0;
+	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	{
+		//re-do all the item IDs.
+		(*pos)->setItemId(j++);
+	}
+
 	delete i;
 	if (selected == i)
 	{
@@ -236,4 +244,11 @@ mutex* ItemCollection::getCollisionMutex(Item *item_a, Item *item_b)
 		collision_mutexes[pair] = new mutex();
 	}
 	return collision_mutexes[pair];
+}
+
+int ItemCollection::getNextItemId()
+{
+	mutex::scoped_lock lock(addremove_mutex);
+	scoped_write_lock wlock(readwrite_mutex);
+	return items.size();
 }
