@@ -217,7 +217,7 @@ void Item::work()
 					otherbbox->min_y < bbox.max_y)
 				{
 					Item* otheritem = *pos;
-					items->setCollision(this, otheritem);
+					items->setCollision(this, otheritem, COLL_TRUE);
 					if (otheritem->item_type == CircleType && item_type == CircleType)
 					{
 						mutex::scoped_lock mlock(otheritem->move_mutex);

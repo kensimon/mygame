@@ -3,12 +3,13 @@
 #include "Game.h"
 #include <iostream>
 
-
 ItemCollection::ItemCollection(int framewait)
 {
 	selected = NULL;
 	phys_thread = NULL;
 	this->framewait = framewait;
+	collision_mutexes = (mutex**)calloc(1, sizeof(mutex));
+	collisions = (CollisionType*)malloc(sizeof(CollisionType));
 }
 
 
@@ -54,6 +55,19 @@ void ItemCollection::push(Item* n)
 	mutex::scoped_lock lock(addremove_mutex);
 	scoped_write_lock wlock(readwrite_mutex);
 	items.push_back(n);
+
+	collision_mutexes = (mutex**)realloc(collision_mutexes, sizeof(mutex) * ((items.size() * items.size()) + 1));
+	collisions = (CollisionType*)realloc(collisions, sizeof(CollisionType) * ((items.size() * items.size()) + 1));
+
+	int size = items.size();
+	for (int i = 0; i < size; ++i)
+	{
+		//if (collision_mutexes[i * size] != NULL && i < size)
+		//{
+		//	delete collision_mutexes[i * size];
+		//}
+		collision_mutexes[i * size] = new mutex();
+	}
 }
 
 Item* ItemCollection::get(int num)
@@ -83,6 +97,9 @@ void ItemCollection::removeItem(Item* i)
 	
 	i->stop();
 	items.remove(i);
+
+	collision_mutexes = (mutex**)realloc(collision_mutexes, sizeof(mutex) * ((items.size() * items.size()) + 1));
+	collisions = (CollisionType*)realloc(collisions, sizeof(CollisionType) * ((items.size() * items.size()) + 1));
 
 	int j = 0;
 	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
@@ -129,11 +146,26 @@ void ItemCollection::calculationLoop()
 {
 	while (!phys_stoprequested)
 	{
+		if (items.size() != 0)
 		{
 			mutex::scoped_lock lock(addremove_mutex); //Make sure we don't wake threads if objects are being added/removed
 			scoped_write_lock writelock(readwrite_mutex); //wait until all threads are done.
-
-			collisions.clear();
+			
+			//Set all the collisions to unknown.  To minimize branches we use...
+			//Duff's device!  wheeeeeee
+			int n = items.size() * items.size();
+			int m = n;
+				switch(m % 8){
+			case 0:	do{	collisions[n--] = COLL_UNKNOWN;
+			case 7:		collisions[n--] = COLL_UNKNOWN;
+			case 6:		collisions[n--] = COLL_UNKNOWN;
+			case 5:		collisions[n--] = COLL_UNKNOWN;
+			case 4:		collisions[n--] = COLL_UNKNOWN;
+			case 3:		collisions[n--] = COLL_UNKNOWN;
+			case 2:		collisions[n--] = COLL_UNKNOWN;
+			case 1:		collisions[n--] = COLL_UNKNOWN;
+				}while(--n>0);
+			}
 
 			//wake up each thread.  Each one will be waiting for the above write lock to free.
 			for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
@@ -217,33 +249,19 @@ int ItemCollection::length()
 	return items.size();
 }
 
-bool ItemCollection::getCollision(Item *item_a, Item *item_b)
+CollisionType ItemCollection::getCollision(Item *item_a, Item *item_b)
 {
-	mutex::scoped_lock lock(check_collision_mutex);
-	std::pair<Item*, Item*> thepair = std::make_pair(max(item_a, item_b), min(item_a, item_b));
-	if (collisions.find(thepair) == collisions.end())
-	{
-		collisions[thepair] = false;
-	}
-
-	return collisions[thepair];
+	return collisions[item_a->getItemId() * item_b->getItemId()];
 }
 
-void ItemCollection::setCollision(Item* item_a, Item* item_b)
+void ItemCollection::setCollision(Item* item_a, Item* item_b, CollisionType c)
 {
-	mutex::scoped_lock lock(check_collision_mutex);
-	collisions[std::make_pair(max(item_a, item_b), min(item_a, item_b))] = true;
+	collisions[item_a->getItemId() * item_b->getItemId()] = c;
 }
 
 mutex* ItemCollection::getCollisionMutex(Item *item_a, Item *item_b)
 {
-	mutex::scoped_lock lock(getmutex_mutex);
-	pair<Item*, Item*> pair = std::make_pair(max(item_a, item_b), min(item_a, item_b));
-	if (collision_mutexes[pair] == NULL)
-	{
-		collision_mutexes[pair] = new mutex();
-	}
-	return collision_mutexes[pair];
+	return collision_mutexes[item_a->getItemId() * item_b->getItemId()];
 }
 
 int ItemCollection::getNextItemId()

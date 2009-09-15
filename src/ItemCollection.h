@@ -7,33 +7,19 @@
 #include <iterator>
 #include <boost/thread.hpp>
 
-#if WIN32
-#include <unordered_map>
-#elif __GNUC__
-#include <tr1/unordered_map>
-#endif
-
 using std::list;
 using std::map;
 using std::pair;
 using boost::mutex;
 using boost::thread;
-using std::tr1::unordered_map;
-using std::tr1::hash;
 
 class collision_iterator; //forward declaration
 
-//provide a hashing function for an Item* pair, useful for checking collisions.
-template <>
-class hash<pair<Item*, Item*> >
+enum CollisionType
 {
-public:
-	size_t operator()(pair<Item*, Item*> thepair) const
-	{
-		return hasher_(thepair.first) + hasher_(thepair.second);
-	}
-private:
-	hash<Item*> hasher_;
+	COLL_UNKNOWN,
+	COLL_TRUE,
+	COLL_FALSE
 };
 
 class ItemCollection
@@ -53,8 +39,8 @@ public:
     int length();
 	list<Item*>::iterator end();
 	Item* getSelected();
-	bool getCollision(Item* item_a, Item* item_b);
-	void setCollision(Item* item_a, Item* item_b);
+	CollisionType getCollision(Item* item_a, Item* item_b);
+	void setCollision(Item* item_a, Item* item_b, CollisionType);
 	mutex* getCollisionMutex(Item* item_a, Item* item_b);
 	boost::shared_mutex* getReadWriteMutex();
 	void stopCalculating();
@@ -67,11 +53,11 @@ private:
 	Item* selected;
 	list<Item*> items;
 	void timerCallback();
-	unordered_map<pair<Item*, Item*>, bool> collisions;
-	unordered_map<pair<Item*, Item*>, mutex*> collision_mutexes;
-	mutex getmutex_mutex; //seriously.
+
+	CollisionType* collisions;
+	mutex** collision_mutexes;
+
 	mutex addremove_mutex;
-	mutex check_collision_mutex;
 	boost::shared_mutex readwrite_mutex;
 	bool phys_stoprequested;
 	thread* phys_thread;
@@ -153,7 +139,7 @@ public:
 				continue;
 			}
 
-			if (items.getCollision(base_item, *items_iterator) == false) //if we haven't calculated a collision for these two,
+			if (items.getCollision(base_item, *items_iterator) == COLL_UNKNOWN) //if we haven't calculated a collision for these two,
 			{
 				return *this; //use this item.
 			}
