@@ -8,10 +8,14 @@ ItemCollection::ItemCollection(int framewait)
 	selected = NULL;
 	phys_thread = NULL;
 	this->framewait = framewait;
-	collision_mutexes = (mutex**)calloc(1, sizeof(mutex));
+	collision_mutexes = (mutex**)malloc(sizeof(mutex*));
 	collisions = (CollisionType*)malloc(sizeof(CollisionType));
-}
 
+	collision_mutexes[0] = new mutex();
+	collisions[0] = COLL_UNKNOWN;
+
+	collision_bufsize = 1;
+}
 
 ItemCollection::~ItemCollection()
 {
@@ -55,19 +59,34 @@ void ItemCollection::push(Item* n)
 	mutex::scoped_lock lock(addremove_mutex);
 	scoped_write_lock wlock(readwrite_mutex);
 	items.push_back(n);
-
-	collision_mutexes = (mutex**)realloc(collision_mutexes, sizeof(mutex) * ((items.size() * items.size()) + 1));
-	collisions = (CollisionType*)realloc(collisions, sizeof(CollisionType) * ((items.size() * items.size()) + 1));
-
 	int size = items.size();
-	for (int i = 0; i < size; ++i)
+	int itemId = n->getItemId();
+
+	if (size * size > collision_bufsize)
 	{
-		//if (collision_mutexes[i * size] != NULL && i < size)
-		//{
-		//	delete collision_mutexes[i * size];
-		//}
-		collision_mutexes[i * size] = new mutex();
+		//We don't have enough mutexes and collision scratch space to store the number of items on the screen.  Time to double the space.
+		mutex** tmp_collision_mutexes = (mutex**)realloc(collision_mutexes, sizeof(mutex*) * (size * size * 2));
+		CollisionType* tmp_collisions = (CollisionType*)realloc(collisions, sizeof(CollisionType) * (size * size * 2));
+
+		if (tmp_collision_mutexes == NULL || tmp_collisions == NULL)
+		{
+			//Memory reallocation failed.  Don't add the item.
+			items.remove(n);
+			delete n;
+			return;
+		}
+
+		collision_mutexes = tmp_collision_mutexes;
+		collisions = tmp_collisions;
+		collision_bufsize = size * size * 2;
+
+		for (int i = size - 1; i < collision_bufsize; ++i)
+		{
+			collision_mutexes[i] = new mutex();
+		}
 	}
+	
+	redoItemIds();
 }
 
 Item* ItemCollection::get(int num)
@@ -98,20 +117,22 @@ void ItemCollection::removeItem(Item* i)
 	i->stop();
 	items.remove(i);
 
-	collision_mutexes = (mutex**)realloc(collision_mutexes, sizeof(mutex) * ((items.size() * items.size()) + 1));
-	collisions = (CollisionType*)realloc(collisions, sizeof(CollisionType) * ((items.size() * items.size()) + 1));
-
-	int j = 0;
-	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
-	{
-		//re-do all the item IDs.
-		(*pos)->setItemId(j++);
-	}
+	redoItemIds();
 
 	delete i;
 	if (selected == i)
 	{
 		selected = NULL;
+	}
+}
+
+void ItemCollection::redoItemIds()
+{
+	int j = 0;
+	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	{
+		//re-do all the item IDs.
+		(*pos)->setItemId(j++);
 	}
 }
 
@@ -151,21 +172,7 @@ void ItemCollection::calculationLoop()
 			mutex::scoped_lock lock(addremove_mutex); //Make sure we don't wake threads if objects are being added/removed
 			scoped_write_lock writelock(readwrite_mutex); //wait until all threads are done.
 			
-			//Set all the collisions to unknown.  To minimize branches we use...
-			//Duff's device!  wheeeeeee
-			int n = items.size() * items.size();
-			int m = n;
-				switch(m % 8){
-			case 0:	do{	collisions[n--] = COLL_UNKNOWN;
-			case 7:		collisions[n--] = COLL_UNKNOWN;
-			case 6:		collisions[n--] = COLL_UNKNOWN;
-			case 5:		collisions[n--] = COLL_UNKNOWN;
-			case 4:		collisions[n--] = COLL_UNKNOWN;
-			case 3:		collisions[n--] = COLL_UNKNOWN;
-			case 2:		collisions[n--] = COLL_UNKNOWN;
-			case 1:		collisions[n--] = COLL_UNKNOWN;
-				}while(--n>0);
-			}
+			memset(collisions, COLL_UNKNOWN, items.size() * sizeof(CollisionType));
 
 			//wake up each thread.  Each one will be waiting for the above write lock to free.
 			for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
@@ -251,17 +258,23 @@ int ItemCollection::length()
 
 CollisionType ItemCollection::getCollision(Item *item_a, Item *item_b)
 {
-	return collisions[item_a->getItemId() * item_b->getItemId()];
+	int minid = min(item_a->getItemId(), item_b->getItemId());
+	int maxid = max(item_a->getItemId(), item_b->getItemId());
+	return collisions[(minid * items.size()) + maxid];
 }
 
 void ItemCollection::setCollision(Item* item_a, Item* item_b, CollisionType c)
 {
-	collisions[item_a->getItemId() * item_b->getItemId()] = c;
+	int minid = min(item_a->getItemId(), item_b->getItemId());
+	int maxid = max(item_a->getItemId(), item_b->getItemId());
+	collisions[(minid * items.size()) + maxid] = c;
 }
 
 mutex* ItemCollection::getCollisionMutex(Item *item_a, Item *item_b)
 {
-	return collision_mutexes[item_a->getItemId() * item_b->getItemId()];
+	int minid = min(item_a->getItemId(), item_b->getItemId());
+	int maxid = max(item_a->getItemId(), item_b->getItemId());
+	return collision_mutexes[(minid * items.size()) + maxid];
 }
 
 int ItemCollection::getNextItemId()

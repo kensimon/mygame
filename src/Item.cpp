@@ -204,6 +204,7 @@ void Item::work()
 			return;
 
 		//Collishin Detectshun!
+		bool isColliding = false;
 		for (collision_iterator pos(*items, this);
 			pos != items->end(); ++pos)
 		{
@@ -221,8 +222,7 @@ void Item::work()
 					if (otheritem->item_type == CircleType && item_type == CircleType)
 					{
 						mutex::scoped_lock mlock(otheritem->move_mutex);
-						this->red = 0;
-						otheritem->red = 0;
+						isColliding = true;
 #if 0
 						GLdouble oldmomentumX = momentumX;
 						GLdouble oldmomentumY = momentumY;
@@ -233,13 +233,16 @@ void Item::work()
 #endif
 					}
 				}
-				else
-				{
-					this->red = 1;
-				}
 			}
 		}
-
+		if (isColliding)
+		{
+			this->red = 0;
+		}
+		else
+		{
+			this->red = orig_red;
+		}
 		mutex::scoped_lock mvlock(move_mutex);
 		degrees += spinMomentum;
 		if (degrees > 360.0)

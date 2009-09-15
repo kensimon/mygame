@@ -61,6 +61,8 @@ private:
 	boost::shared_mutex readwrite_mutex;
 	bool phys_stoprequested;
 	thread* phys_thread;
+	int collision_bufsize;
+	void redoItemIds();
 };
 
 class collision_iterator
