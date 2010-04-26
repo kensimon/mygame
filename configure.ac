@@ -149,6 +149,7 @@ AC_DEFUN( FIND_GL_LIB, [
     if test "x$have_GL" = "xno" -a "x$with_gl_lib_name" = "x" ; then
         GL_LIB_LIST=`grep -v -E "^$GL_LIB_NAME\$" <<EOF
 GL
+OpenGL
 MesaGL
 opengl32
 EOF
@@ -213,6 +214,39 @@ fi
 LIBS="$saved_LIBS"
 
 dnl ===================
+dnl Check for GLU
+dnl ===================
+AC_ARG_WITH(glu-libs,	[  --with-glu-libs=DIR	GLU library location])
+
+if test "x$with_glu_libs" = "x" ; then
+    GLU_LDOPTS=""
+else
+    GLU_LDOPTS="-L$with_glu_libs"
+fi
+
+saved_LIBS="$LIBS"
+GLU_LIBS=""
+
+AC_DEFUN( CHECK_FOR_GLU_LIB, [
+    AC_MSG_CHECKING([for GLU library])
+    LIBS="$LIBS $GL_LDOPTS -l$GL_LIB_NAME -lGLU"
+    AC_TRY_LINK( , , have_GLU=yes, have_GLU=no)
+    AC_MSG_RESULT([$have_GLU])
+
+    if test "x$have_GLU" = "xyes" ; then
+        GLU_LIBS="-lGLU"
+    fi
+])
+
+CHECK_FOR_GLU_LIB
+
+if test "x$have_GLU" = "xno" ; then
+    AC_MSG_ERROR([Cannot find GLU library])
+fi
+
+LIBS="$saved_LIBS"
+
+dnl ===================
 dnl Check for pthread
 dnl ===================
 
@@ -260,14 +294,28 @@ saved_LIBS="$LIBS"
 BOOST_LIBS=""
 
 AC_DEFUN( CHECK_FOR_BOOST_LIB, [
-    AC_MSG_CHECKING([for Boost library])
+    AC_MSG_CHECKING([for Boost library (with -mt)])
     LIBS="$LIBS $BOOST_LDOPTS -lboost_thread-mt"
-    AC_TRY_LINK( , , have_BOOST=yes, have_BOOST=no)
-    AC_MSG_RESULT([$have_BOOST])
+    AC_TRY_LINK( , , have_BOOSTmt=yes, have_BOOSTmt=no)
+    AC_MSG_RESULT([$have_BOOSTmt])
 
-    if test "x$have_BOOST" = "xyes" ; then
+    if test "x$have_BOOSTmt" = "xyes" ; then
         BOOST_LIBS="$BOOST_LDOPTS -lboost_thread-mt"
     fi
+
+	dnl in case -mt isn't available
+	if test "x$have_BOOSTmt" = "xno" ; then
+
+		LIBS="$saved_LIBS"
+		AC_MSG_CHECKING([for Boost library (without -mt)])
+		LIBS="$LIBS $BOOST_LDOPTS -lboost_thread"
+		AC_TRY_LINK( , , have_BOOST=yes, have_BOOST=no)
+		AC_MSG_RESULT([$have_BOOST])
+
+		if test "x$have_BOOST" = "xyes" ; then
+			BOOST_LIBS="$BOOST_LDOPTS -lboost_thread"
+		fi
+	fi
 ])
 
 CHECK_FOR_BOOST_LIB
@@ -278,6 +326,6 @@ fi
 
 LIBS="$saved_LIBS"
 
-LIBS="$LIBS $GL_LIBS $GLUT_LIBS $BOOST_LIBS $PTHREAD_LIBS"
+LIBS="$LIBS $GL_LIBS $GLU_LIBS $GLUT_LIBS $BOOST_LIBS $PTHREAD_LIBS"
 
 AC_OUTPUT([Makefile src/Makefile])
