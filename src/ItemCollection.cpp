@@ -2,6 +2,7 @@
 #include "Square.h"
 #include "Game.h"
 #include <iostream>
+#include <cstring>
 
 ItemCollection::ItemCollection()
 {

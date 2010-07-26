@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <list>
+#include <cstdio>
 
 Game* Game::instance = NULL;
 
