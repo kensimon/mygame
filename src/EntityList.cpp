@@ -24,7 +24,7 @@ EntityList::~EntityList()
 
 list<Entity*>::iterator EntityList::end()
 {
-	return items.end();
+	return entities.end();
 }
 
 void EntityList::startCalculating()
@@ -59,20 +59,20 @@ void EntityList::push_back(Entity* n)
 {
 	mutex::scoped_lock lock(addremove_mutex);
 	scoped_write_lock wlock(readwrite_mutex);
-	items.push_back(n);
-	int size = items.size();
+	entities.push_back(n);
+	int size = entities.size();
 	int itemId = n->getEntityId();
 
 	if (size * size > collision_bufsize)
 	{
-		//We don't have enough mutexes and collision scratch space to store the number of items on the screen.  Time to double the space.
+		//We don't have enough mutexes and collision scratch space to store the number of entities on the screen.  Time to double the space.
 		mutex** tmp_collision_mutexes = (mutex**)realloc(collision_mutexes, sizeof(mutex*) * (size * size * 2));
 		CollisionType* tmp_collisions = (CollisionType*)realloc(collisions, sizeof(CollisionType) * (size * size * 2));
 
 		if (tmp_collision_mutexes == NULL || tmp_collisions == NULL)
 		{
 			//Memory reallocation failed.  Don't add the item.
-			items.remove(n);
+			entities.remove(n);
 			delete n;
 			return;
 		}
@@ -93,7 +93,7 @@ void EntityList::push_back(Entity* n)
 Entity* EntityList::get(int num)
 {
     int i = 0;
-	for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	for (list<Entity*>::iterator pos = entities.begin(); pos != entities.end(); ++pos)
 	{
 		if (i++ == num)
 		{
@@ -108,7 +108,7 @@ void EntityList::removeEntity(Entity* i)
 	if (i == NULL)
 		return;
 
-	i->thread_stoprequested = true;
+	i->pause();
 	mutex::scoped_lock lock(addremove_mutex); //make sure no more object threads are waked
 	
 	//wait until all object threads are asleep, then immediately relese the lock. that way,
@@ -116,7 +116,7 @@ void EntityList::removeEntity(Entity* i)
 	{ scoped_write_lock wlock(readwrite_mutex); }
 	
 	i->stop();
-	items.remove(i);
+	entities.remove(i);
 
 	redoEntityIds();
 
@@ -130,7 +130,7 @@ void EntityList::removeEntity(Entity* i)
 void EntityList::redoEntityIds()
 {
 	int j = 0;
-	for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	for (list<Entity*>::iterator pos = entities.begin(); pos != entities.end(); ++pos)
 	{
 		//re-do all the item IDs.
 		(*pos)->setEntityId(j++);
@@ -144,13 +144,13 @@ void EntityList::removeEntity(int num)
 
 void EntityList::pop_back()
 {
-	removeEntity(items.size() - 1);
+	removeEntity(entities.size() - 1);
 }
 
 void EntityList::drawAll()
 {
     bool dbb = Game::getInstance()->drawBBoxes;
-	for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	for (list<Entity*>::iterator pos = entities.begin(); pos != entities.end(); ++pos)
 	{
 		if (dbb) {
 			(*pos)->drawBBox();
@@ -168,15 +168,15 @@ void EntityList::calculationLoop()
 {
 	while (!phys_stoprequested)
 	{
-		if (items.size() != 0)
+		if (entities.size() != 0)
 		{
 			mutex::scoped_lock lock(addremove_mutex); //Make sure we don't wake threads if objects are being added/removed
 			scoped_write_lock writelock(readwrite_mutex); //wait until all threads are done.
 			
-			memset(collisions, COLL_UNKNOWN, items.size() * sizeof(CollisionType));
+			memset(collisions, COLL_UNKNOWN, entities.size() * sizeof(CollisionType));
 
 			//wake up each thread.  Each one will be waiting for the above write lock to free.
-			for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+			for (list<Entity*>::iterator pos = entities.begin(); pos != entities.end(); ++pos)
 			{
 				(*pos)->tick();
 			}
@@ -188,7 +188,7 @@ void EntityList::calculationLoop()
 
 void EntityList::select(GLdouble x, GLdouble y)
 {
-	if (items.size() == 0)
+	if (entities.size() == 0)
 		return;
 
     Entity* cur;
@@ -199,7 +199,7 @@ void EntityList::select(GLdouble x, GLdouble y)
 	 * last, and we want to select the item that the user is seeing, not the one
 	 * that's drawn underneath.
 	 */
-	for (list<Entity*>::reverse_iterator pos = items.rbegin(); pos != items.rend() && !done; ++pos)
+	for (list<Entity*>::reverse_iterator pos = entities.rbegin(); pos != entities.rend() && !done; ++pos)
 	{
 		done = true;
 		cur = *(pos);
@@ -236,11 +236,11 @@ void EntityList::select(GLdouble x, GLdouble y)
 	//Move selected to the back, so it gets rendered on top.
 	if (selected != NULL)
     {
-		//We have to acqure a lock to make sure no threads are still working while we re-arrange the items.
+		//We have to acqure a lock to make sure no threads are still working while we re-arrange the entities.
 		mutex::scoped_lock lock(addremove_mutex);
 		scoped_write_lock wlock(readwrite_mutex);
-		items.remove(selected);
-		items.push_back(selected);
+		entities.remove(selected);
+		entities.push_back(selected);
     }
 
     if (selected != NULL)
@@ -254,33 +254,33 @@ Entity* EntityList::getSelected()
 
 int EntityList::length()
 {
-	return items.size();
+	return entities.size();
 }
 
 CollisionType EntityList::getCollision(Entity& item_a, Entity& item_b)
 {
 	int minid = min(item_a.getEntityId(), item_b.getEntityId());
 	int maxid = max(item_a.getEntityId(), item_b.getEntityId());
-	return collisions[(minid * items.size()) + maxid];
+	return collisions[(minid * entities.size()) + maxid];
 }
 
 void EntityList::setCollision(Entity& item_a, Entity& item_b, CollisionType c)
 {
 	int minid = min(item_a.getEntityId(), item_b.getEntityId());
 	int maxid = max(item_a.getEntityId(), item_b.getEntityId());
-	collisions[(minid * items.size()) + maxid] = c;
+	collisions[(minid * entities.size()) + maxid] = c;
 }
 
 mutex* EntityList::getCollisionMutex(Entity *item_a, Entity *item_b)
 {
 	int minid = min(item_a->getEntityId(), item_b->getEntityId());
 	int maxid = max(item_a->getEntityId(), item_b->getEntityId());
-	return collision_mutexes[(minid * items.size()) + maxid];
+	return collision_mutexes[(minid * entities.size()) + maxid];
 }
 
 int EntityList::getNextEntityId()
 {
 	mutex::scoped_lock lock(addremove_mutex);
 	scoped_write_lock wlock(readwrite_mutex);
-	return items.size();
+	return entities.size();
 }

@@ -56,7 +56,7 @@ public:
 
 private:
 	Entity* selected;
-	list<Entity*> items;
+	list<Entity*> entities;
 	void timerCallback();
 
 	CollisionType* collisions;
@@ -75,25 +75,25 @@ class collision_iterator
 	: public std::iterator<std::forward_iterator_tag, Entity*>
 {
 protected:
-	EntityList& items;
+	EntityList& entities;
 	Entity* base_item;
-	std::list<Entity*>::iterator items_iterator;
+	std::list<Entity*>::iterator entities_iterator;
 	std::pair<bool, GLdouble> blankpair;
 
 public:
 
 	explicit collision_iterator(EntityList& coll, Entity* baseEntity)
-		: items_iterator(items.items.begin()),
-		items(coll)
+		: entities_iterator(entities.entities.begin()),
+		entities(coll)
 	{
 		base_item = baseEntity;
 		if (*this == baseEntity)
-			items_iterator++;
+			entities_iterator++;
 	}
 
 	Entity* operator* ()
 	{
-		return (*items_iterator);
+		return (*entities_iterator);
 	}
 
 	Entity* operator-> ()
@@ -109,17 +109,17 @@ public:
 
 	bool operator==( const collision_iterator& other)
 	{
-		return (*(items_iterator) == *(other.items_iterator));
+		return (*(entities_iterator) == *(other.entities_iterator));
 	}
 	
 	bool operator==( const list<Entity*>::iterator& other)
 	{
-		return (items_iterator == other);
+		return (entities_iterator == other);
 	}
 
 	bool operator==( const Entity* other )
 	{
-		return ((*items_iterator) == other);
+		return ((*entities_iterator) == other);
 	}
 
 	bool operator!=( const collision_iterator& other)
@@ -134,25 +134,25 @@ public:
 
 	collision_iterator& operator++ ()
 	{
-		if (items_iterator == items.items.end())
+		if (entities_iterator == entities.entities.end())
 			return *this;
 
-		++items_iterator;
-		while (items_iterator != items.items.end())
+		++entities_iterator;
+		while (entities_iterator != entities.entities.end())
 		{
-			if (*items_iterator == base_item)
+			if (*entities_iterator == base_item)
 			{
-				++items_iterator;
+				++entities_iterator;
 				continue;
 			}
 
-			if (items.getCollision(*base_item, **items_iterator) == COLL_UNKNOWN) //if we haven't calculated a collision for these two,
+			if (entities.getCollision(*base_item, **entities_iterator) == COLL_UNKNOWN) //if we haven't calculated a collision for these two,
 			{
 				return *this; //use this item.
 			}
 			else
 			{
-				++items_iterator; //else, move onto the next one.
+				++entities_iterator; //else, move onto the next one.
 				continue;
 			}
 		}

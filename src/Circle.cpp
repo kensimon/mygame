@@ -1,12 +1,12 @@
 #include "Circle.h"
 #include "Game.h"
 
-Circle::Circle(int id, int xpos, int ypos, int itemsize)
+Circle::Circle(int id, int xpos, int ypos, int entitiesize)
 : Entity(id, CircleType)
 {
     x = xpos;
     y = ypos;
-    size = itemsize;
+    size = entitiesize;
     degrees = 0;
     quad = gluNewQuadric();
 	floor_friction = 0.99;

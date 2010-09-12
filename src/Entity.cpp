@@ -49,6 +49,11 @@ void Entity::stop()
 	}
 }
 
+void Entity::pause()
+{
+	thread_stoprequested = true;
+}
+
 void Entity::dragTo(GLdouble a, GLdouble b)
 {
 	if (thread_stoprequested)
@@ -192,23 +197,22 @@ void Entity::tick()
 
 void Entity::work()
 {
-	EntityList* items = Game::getInstance()->getEntityList();
+	EntityList* entities = Game::getInstance()->getEntityList();
 	while (!thread_stoprequested)
 	{
 		{ mutex::scoped_lock lock(tick_mutex); wait_variable.wait(lock); } //wait for notification to continue.
 		if (thread_stoprequested) //the destructor also calls notify_all(), so if we're being destructed, quit now.
 			return;
 
-		scoped_read_lock rlock(*(items->getReadWriteMutex()));
+		scoped_read_lock rlock(*(entities->getReadWriteMutex()));
 		if (thread_stoprequested) //the deleter thread could be what released the lock
 			return;
 
 		//Collishin Detectshun!
 		bool isColliding = false;
-		for (EntityList::iterator pos(*items, this);
-			pos != items->end(); ++pos)
+		for (EntityList::iterator pos(*entities, this); pos != entities->end(); ++pos)
 		{
-			mutex* m = items->getCollisionMutex(this, *pos);
+			mutex* m = entities->getCollisionMutex(this, *pos);
 			if (mutex::scoped_try_lock(*m))
 			{
 				BBox* otherbbox = &((*pos)->bbox);
@@ -218,7 +222,7 @@ void Entity::work()
 					otherbbox->min_y < bbox.max_y)
 				{
 					Entity* otheritem = *pos;
-					items->setCollision(*this, *otheritem, COLL_TRUE);
+					entities->setCollision(*this, *otheritem, COLL_TRUE);
 					if (otheritem->item_type == CircleType && item_type == CircleType)
 					{
 						mutex::scoped_lock mlock(otheritem->move_mutex);

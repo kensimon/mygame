@@ -54,17 +54,14 @@ class BBox
     }
 };
 
-class EntityList; //forward declaration
-
-
 class Entity
 {
-	friend class EntityList;
     public:
         virtual ~Entity();
         void resize(GLdouble x);
         void setMass(GLdouble newMass);
 		void stop();
+		void pause();
         GLdouble getx();
         GLdouble gety();
         int getSpinMomentum();

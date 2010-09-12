@@ -13,7 +13,7 @@ Game* Game::instance = NULL;
 Game::Game()
 {
     drawBBoxes = false;
-    ic = new EntityList(16666);
+    el = new EntityList(16666);
     curbutton = 0;
     width = WINSIZE_X;
     height = WINSIZE_Y;
@@ -24,7 +24,7 @@ Game::Game()
 
 Game::~Game()
 {
-	ic->stopCalculating();
+	el->stopCalculating();
 };
 
 Game* Game::getInstance()
@@ -52,7 +52,7 @@ int Game::init(int argc, char **argv)
     glutSpecialFunc(Game::specialFunc);
     glutTimerFunc(0, Game::drawTimerCallback, 0);
     glutMotionFunc(Game::dragMouse);
-	ic->startCalculating();
+	el->startCalculating();
     glutMainLoop();
     return 0;
 }
@@ -76,7 +76,7 @@ void Game::drawTimerCallback(int)
 void Game::display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    instance->ic->drawAll();
+    instance->el->drawAll();
     glutSwapBuffers();
 }
 
@@ -108,68 +108,68 @@ void Game::keyboardFunc(unsigned char key, int, int)
             break;
         case 'c':
 			{
-				if (instance->ic->getSelected() == NULL)
+				if (instance->el->getSelected() == NULL)
 				{
 					break;
 				}
-				printf("x: %f, y: %f\n", instance->ic->getSelected()->getx(), instance->ic->getSelected()->gety());
-				printf("rotation: %f\n", instance->ic->getSelected()->getRotation());
-				printf("momentumx: %f, momentumy: %f\n\n", instance->ic->getSelected()->momentumX,
-						instance->ic->getSelected()->momentumY);
+				printf("x: %f, y: %f\n", instance->el->getSelected()->getx(), instance->el->getSelected()->gety());
+				printf("rotation: %f\n", instance->el->getSelected()->getRotation());
+				printf("momentumx: %f, momentumy: %f\n\n", instance->el->getSelected()->momentumX,
+						instance->el->getSelected()->momentumY);
 				break;
 			}
         case 'd':
-            instance->ic->removeEntity(instance->ic->getSelected());
+            instance->el->removeEntity(instance->el->getSelected());
             break;
         case 'g':
             instance->gravityOn = !instance->gravityOn;
             break;
         case 'p':
-            instance->ic->pop_back();
+            instance->el->pop_back();
             break;
         case 'b':
             instance->drawBBoxes = !(instance->drawBBoxes);
             break;
         case 'l':
-            instance->ic->removeEntity(instance->ic->length() - 1);
+            instance->el->removeEntity(instance->el->length() - 1);
             break;
 		case 's':
 			{
-				if (instance->ic->isCalculationStopped())
-					instance->ic->startCalculating();
+				if (instance->el->isCalculationStopped())
+					instance->el->startCalculating();
 				else
-					instance->ic->stopCalculating();
+					instance->el->stopCalculating();
 				break;
 			}
         case '0':
-            instance->ic->removeEntity(0);
+            instance->el->removeEntity(0);
             break;
         case '1':
-            instance->ic->removeEntity(1);
+            instance->el->removeEntity(1);
             break;
         case '2':
-            instance->ic->removeEntity(2);
+            instance->el->removeEntity(2);
             break;
         case '3':
-            instance->ic->removeEntity(3);
+            instance->el->removeEntity(3);
             break;
         case '4':
-            instance->ic->removeEntity(4);
+            instance->el->removeEntity(4);
             break;
         case '5':
-            instance->ic->removeEntity(5);
+            instance->el->removeEntity(5);
             break;
         case '6':
-            instance->ic->removeEntity(6);
+            instance->el->removeEntity(6);
             break;
         case '7':
-            instance->ic->removeEntity(7);
+            instance->el->removeEntity(7);
             break;
         case '8':
-            instance->ic->removeEntity(8);
+            instance->el->removeEntity(8);
             break;
         case '9':
-            instance->ic->removeEntity(9);
+            instance->el->removeEntity(9);
             break;
         default:
             break;
@@ -178,23 +178,23 @@ void Game::keyboardFunc(unsigned char key, int, int)
 
 void Game::specialFunc(int key, int x, int y)
 {
-	if (instance->ic->getSelected() == NULL)
+	if (instance->el->getSelected() == NULL)
 	{
 		return;
 	}
     switch(key)
     {
         case GLUT_KEY_UP:
-            instance->ic->getSelected()->resize(1);
+            instance->el->getSelected()->resize(1);
             break;
         case GLUT_KEY_DOWN:
-            instance->ic->getSelected()->resize(-1);
+            instance->el->getSelected()->resize(-1);
             break;
         case GLUT_KEY_LEFT:
-            instance->ic->getSelected()->spinMomentum -= 1;
+            instance->el->getSelected()->spinMomentum -= 1;
             break;
         case GLUT_KEY_RIGHT:
-            instance->ic->getSelected()->spinMomentum += 1;
+            instance->el->getSelected()->spinMomentum += 1;
             break;
         default:
             break;
@@ -208,32 +208,32 @@ void Game::mouse(int button, int state, int x, int y)
         case GLUT_LEFT_BUTTON:
             if (state == GLUT_DOWN)
             {
-                instance->ic->select((GLdouble)x, (GLdouble)y);
-				Entity* selected = instance->ic->getSelected();
+                instance->el->select((GLdouble)x, (GLdouble)y);
+				Entity* selected = instance->el->getSelected();
 				if (selected != NULL)
 				{
-					instance->ic->getSelected()->setClickPos((GLdouble)x, (GLdouble)y);
-					instance->ic->getSelected()->grabbed = true;
+					instance->el->getSelected()->setClickPos((GLdouble)x, (GLdouble)y);
+					instance->el->getSelected()->grabbed = true;
 				}
             }
             if (state == GLUT_UP)
             {
-				if (instance->ic->getSelected() != NULL)
+				if (instance->el->getSelected() != NULL)
 				{
-					instance->ic->getSelected()->grabbed = false;
+					instance->el->getSelected()->grabbed = false;
 				}
             }
             break;
         case GLUT_RIGHT_BUTTON:
             if (state == GLUT_DOWN)
             {
-                instance->ic->push_back(new Circle(instance->ic->getNextEntityId(), x, y));
+                instance->el->push_back(new Circle(instance->el->getNextEntityId(), x, y));
             }
             break;
         case GLUT_MIDDLE_BUTTON:
             if (state == GLUT_DOWN)
             {
-                instance->ic->push_back(new Square(instance->ic->getNextEntityId(), x, y));
+                instance->el->push_back(new Square(instance->el->getNextEntityId(), x, y));
             }
         default:
             break;
@@ -242,15 +242,15 @@ void Game::mouse(int button, int state, int x, int y)
 
 void Game::dragMouse(int x, int y)
 {
-	if (instance->curbutton == GLUT_LEFT_BUTTON && instance->ic->getSelected() != NULL)
+	if (instance->curbutton == GLUT_LEFT_BUTTON && instance->el->getSelected() != NULL)
 	{
-		instance->ic->getSelected()->dragTo(x, y);
+		instance->el->getSelected()->dragTo(x, y);
 	}
 }
 
 EntityList* Game::getEntityList()
 {
-    return this->ic;
+    return this->el;
 }
 
 int Game::getWidth()

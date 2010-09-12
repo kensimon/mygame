@@ -31,7 +31,7 @@ class Game
         static void dragMouse(int, int);
         static Game* instance;
         int curbutton;
-        EntityList* ic;
+        EntityList* el;
         int width;
         int height;
 		mutex read_mutex;
