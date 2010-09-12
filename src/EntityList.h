@@ -1,6 +1,6 @@
 #ifndef __ITEMCOLLECTION_H
 #define __ITEMCOLLECTION_H
-#include "Item.h"
+#include "Entity.h"
 #include "scoped_rw_lock.h"
 #include <list>
 #include <map>
@@ -13,8 +13,6 @@ using std::pair;
 using boost::mutex;
 using boost::thread;
 
-class collision_iterator; //forward declaration
-
 enum CollisionType
 {
 	COLL_UNKNOWN,
@@ -22,39 +20,47 @@ enum CollisionType
 	COLL_FALSE
 };
 
-class ItemCollection
+class collision_iterator;
+
+class EntityList
 {
 	friend class collision_iterator;
+
 public:
-	ItemCollection(int framewait);
-	~ItemCollection();
-	void push(Item* i);
-    Item* get(int num);
-	void pop();
+	EntityList(int framewait);
+	~EntityList();
+
+	typedef collision_iterator iterator;
+
+	void setCollision(Entity& item_a, Entity& item_b, CollisionType);
+	CollisionType getCollision(Entity& item_a, Entity& item_b);
+
+	void push_back(Entity* i);
+	void pop_back();
+    Entity* get(int num);
 	void drawAll();
 	void calculationLoop();
 	void select(GLdouble x, GLdouble y);
-	void removeItem(Item* i);
-	void removeItem(int num);
+	void removeEntity(Entity* i);
+	void removeEntity(int num);
     int length();
-	list<Item*>::iterator end();
-	Item* getSelected();
-	CollisionType getCollision(Item* item_a, Item* item_b);
-	void setCollision(Item* item_a, Item* item_b, CollisionType);
-	mutex* getCollisionMutex(Item* item_a, Item* item_b);
+	list<Entity*>::iterator end();
+	Entity* getSelected();
+	mutex* getCollisionMutex(Entity* item_a, Entity* item_b);
 	boost::shared_mutex* getReadWriteMutex();
 	void stopCalculating();
 	void startCalculating();
 	bool isCalculationStopped();
 	int framewait;
-	int getNextItemId();
+	int getNextEntityId();
 
 private:
-	Item* selected;
-	list<Item*> items;
+	Entity* selected;
+	list<Entity*> items;
 	void timerCallback();
 
 	CollisionType* collisions;
+
 	mutex** collision_mutexes;
 
 	mutex addremove_mutex;
@@ -62,41 +68,40 @@ private:
 	bool phys_stoprequested;
 	thread* phys_thread;
 	int collision_bufsize;
-	void redoItemIds();
+	void redoEntityIds();
 };
 
 class collision_iterator
-	: public std::iterator<std::forward_iterator_tag, Item*>
+	: public std::iterator<std::forward_iterator_tag, Entity*>
 {
-	friend class ItemCollection;
 protected:
-	ItemCollection& items;
-	Item* base_item;
-	std::list<Item*>::iterator items_iterator;
+	EntityList& items;
+	Entity* base_item;
+	std::list<Entity*>::iterator items_iterator;
 	std::pair<bool, GLdouble> blankpair;
 
 public:
 
-	explicit collision_iterator(ItemCollection& coll, Item* baseItem)
+	explicit collision_iterator(EntityList& coll, Entity* baseEntity)
 		: items_iterator(items.items.begin()),
 		items(coll)
 	{
-		base_item = baseItem;
-		if (*this == baseItem)
+		base_item = baseEntity;
+		if (*this == baseEntity)
 			items_iterator++;
 	}
 
-	Item* operator* ()
+	Entity* operator* ()
 	{
 		return (*items_iterator);
 	}
 
-	Item* operator-> ()
+	Entity* operator-> ()
 	{
 		return *(*this);
 	}
 
-	collision_iterator& operator= (const Item* value)
+	collision_iterator& operator= (const Entity* value)
 	{
 		//no-op
 		return *this;
@@ -107,12 +112,12 @@ public:
 		return (*(items_iterator) == *(other.items_iterator));
 	}
 	
-	bool operator==( const list<Item*>::iterator& other)
+	bool operator==( const list<Entity*>::iterator& other)
 	{
 		return (items_iterator == other);
 	}
 
-	bool operator==( const Item* other )
+	bool operator==( const Entity* other )
 	{
 		return ((*items_iterator) == other);
 	}
@@ -122,7 +127,7 @@ public:
 		return !(*this == other);
 	}
 	
-	bool operator!=( const list<Item*>::iterator& other)
+	bool operator!=( const list<Entity*>::iterator& other)
 	{
 		return !(*this == other);
 	}
@@ -141,7 +146,7 @@ public:
 				continue;
 			}
 
-			if (items.getCollision(base_item, *items_iterator) == COLL_UNKNOWN) //if we haven't calculated a collision for these two,
+			if (items.getCollision(*base_item, **items_iterator) == COLL_UNKNOWN) //if we haven't calculated a collision for these two,
 			{
 				return *this; //use this item.
 			}

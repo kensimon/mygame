@@ -39,7 +39,6 @@ saved_CPPFLAGS="$CPPFLAGS"
 
 AC_DEFUN( CHECK_FOR_GL_H, [
     CPPFLAGS="$saved_CPPFLAGS $GL_CPPFLAGS"
-
     AC_MSG_CHECKING([for GL/gl.h])
     AC_TRY_CPP( [ #include <GL/gl.h> ], have_gl_h=yes, have_gl_h=no )
     AC_MSG_RESULT([$have_gl_h])

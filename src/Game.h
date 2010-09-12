@@ -2,7 +2,7 @@
 #define __GAME_H
 #include <GL/glut.h>
 #include <iostream>
-#include "ItemCollection.h"
+#include "EntityList.h"
 #include <boost/thread.hpp>
 
 using boost::mutex;
@@ -15,7 +15,7 @@ class Game
 		bool isCalculating;
         int init(int, char**);
         bool drawBBoxes;
-        ItemCollection* getItemCollection();
+        EntityList* getEntityList();
         int getHeight();
         int getWidth();
 		bool getGravityOn();
@@ -31,7 +31,7 @@ class Game
         static void dragMouse(int, int);
         static Game* instance;
         int curbutton;
-        ItemCollection* ic;
+        EntityList* ic;
         int width;
         int height;
 		mutex read_mutex;

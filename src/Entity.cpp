@@ -1,8 +1,8 @@
-#include "Item.h"
+#include "Entity.h"
 #include "Game.h"
 #include <iostream>
 
-Item::Item(int id, ItemType type)
+Entity::Entity(int id, EntityType type)
 : thread_stoprequested(false),
 tick_thread(NULL),
 bbox(0,0,0,0)
@@ -32,14 +32,14 @@ bbox(0,0,0,0)
 	itemId = id;
 }
 
-Item::~Item()
+Entity::~Entity()
 {
 	stop();
 	if (tick_thread != NULL)
 		delete tick_thread;
 }
 
-void Item::stop()
+void Entity::stop()
 {
 	if (tick_thread != NULL && tick_thread->joinable())
 	{
@@ -49,7 +49,7 @@ void Item::stop()
 	}
 }
 
-void Item::dragTo(GLdouble a, GLdouble b)
+void Entity::dragTo(GLdouble a, GLdouble b)
 {
 	if (thread_stoprequested)
 	{
@@ -98,32 +98,32 @@ void Item::dragTo(GLdouble a, GLdouble b)
 	updateBBox();
 }
 
-void Item::resize (GLdouble x)
+void Entity::resize (GLdouble x)
 {
     size += x;
     updateBBox();
 }
 
-void Item::setMass(GLdouble newMass)
+void Entity::setMass(GLdouble newMass)
 {
     mass = newMass;
 }
 
-GLdouble Item::getx()
+GLdouble Entity::getx()
 {
     return x;
 }
 
-GLdouble Item::gety()
+GLdouble Entity::gety()
 {
     return y;
 }
 
-void Item::draw()
+void Entity::draw()
 {
 } 
 
-void Item::drawBBox()
+void Entity::drawBBox()
 {
     glPushMatrix();
     glLoadIdentity();
@@ -142,57 +142,57 @@ void Item::drawBBox()
     glPopMatrix();
 } 
 
-GLdouble Item::getRotation()
+GLdouble Entity::getRotation()
 {
     return degrees;
 }
 
-GLdouble Item::getSize()
+GLdouble Entity::getSize()
 {
     return size;
 }
 
-void Item::setColor(GLdouble red, GLdouble green, GLdouble blue)
+void Entity::setColor(GLdouble red, GLdouble green, GLdouble blue)
 {
     this->red = red;
     this->green = green;
     this->blue = blue;
 }
 
-void Item::resetColor()
+void Entity::resetColor()
 {
 	red = orig_red;
 	blue = orig_blue;
 	green = orig_green;
 }
 
-GLdouble Item::getMass()
+GLdouble Entity::getMass()
 {
     return mass;
 }
 
-void Item::setClickPos(GLdouble x, GLdouble y)
+void Entity::setClickPos(GLdouble x, GLdouble y)
 {
     xclickpos = x;
     yclickpos = y;
 }
 
-void Item::updateBBox()
+void Entity::updateBBox()
 {
 }
 
-void Item::tick()
+void Entity::tick()
 {
 	if (tick_thread == NULL)
 	{
-		tick_thread = new boost::thread(boost::bind(&Item::work, this));
+		tick_thread = new boost::thread(boost::bind(&Entity::work, this));
 	}
 	wait_variable.notify_all();
 }
 
-void Item::work()
+void Entity::work()
 {
-	ItemCollection* items = Game::getInstance()->getItemCollection();
+	EntityList* items = Game::getInstance()->getEntityList();
 	while (!thread_stoprequested)
 	{
 		{ mutex::scoped_lock lock(tick_mutex); wait_variable.wait(lock); } //wait for notification to continue.
@@ -205,7 +205,7 @@ void Item::work()
 
 		//Collishin Detectshun!
 		bool isColliding = false;
-		for (collision_iterator pos(*items, this);
+		for (EntityList::iterator pos(*items, this);
 			pos != items->end(); ++pos)
 		{
 			mutex* m = items->getCollisionMutex(this, *pos);
@@ -217,20 +217,12 @@ void Item::work()
 					otherbbox->max_y > bbox.min_y &&
 					otherbbox->min_y < bbox.max_y)
 				{
-					Item* otheritem = *pos;
-					items->setCollision(this, otheritem, COLL_TRUE);
+					Entity* otheritem = *pos;
+					items->setCollision(*this, *otheritem, COLL_TRUE);
 					if (otheritem->item_type == CircleType && item_type == CircleType)
 					{
 						mutex::scoped_lock mlock(otheritem->move_mutex);
 						isColliding = true;
-#if 0
-						GLdouble oldmomentumX = momentumX;
-						GLdouble oldmomentumY = momentumY;
-						momentumX += otheritem->momentumX;
-						momentumY += otheritem->momentumY;
-						otheritem->momentumX += oldmomentumX;
-						otheritem->momentumY += oldmomentumY;
-#endif
 					}
 				}
 			}
@@ -343,12 +335,12 @@ void Item::work()
 	}
 }
 
-void Item::setItemId(int id)
+void Entity::setEntityId(int id)
 {
 	itemId = id;
 }
 
-int Item::getItemId()
+int Entity::getEntityId()
 {
 	return itemId;
 }

@@ -26,7 +26,7 @@ using boost::mutex;
 class Game;
 
 
-enum ItemType
+enum EntityType
 {
 	SquareType, CircleType
 };
@@ -54,14 +54,14 @@ class BBox
     }
 };
 
-class ItemCollection; //forward declaration
+class EntityList; //forward declaration
 
 
-class Item
+class Entity
 {
-	friend class ItemCollection;
+	friend class EntityList;
     public:
-        virtual ~Item();
+        virtual ~Entity();
         void resize(GLdouble x);
         void setMass(GLdouble newMass);
 		void stop();
@@ -82,11 +82,11 @@ class Item
         bool grabbed;
         int spinMomentum;
 		void tick();
-		void setItemId(int id);
-		int getItemId();
+		void setEntityId(int id);
+		int getEntityId();
 
     protected:
-        Item(int id, ItemType type);
+        Entity(int id, EntityType type);
         virtual void updateBBox();
         GLdouble x;
         GLdouble y;
@@ -120,7 +120,7 @@ class Item
 		void work();
 		thread* tick_thread;
 		Game* instance;
-		ItemType item_type;
+		EntityType item_type;
 		bool thread_stoprequested;
 		int itemId;
 };

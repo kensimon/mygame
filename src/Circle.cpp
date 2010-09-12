@@ -2,7 +2,7 @@
 #include "Game.h"
 
 Circle::Circle(int id, int xpos, int ypos, int itemsize)
-: Item(id, CircleType)
+: Entity(id, CircleType)
 {
     x = xpos;
     y = ypos;

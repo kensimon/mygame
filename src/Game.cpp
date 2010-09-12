@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "Square.h"
 #include "Circle.h"
-#include "ItemCollection.h"
+#include "EntityList.h"
 #include "Config.h"
 #include <iostream>
 #include <cstdlib>
@@ -13,7 +13,7 @@ Game* Game::instance = NULL;
 Game::Game()
 {
     drawBBoxes = false;
-    ic = new ItemCollection(16666);
+    ic = new EntityList(16666);
     curbutton = 0;
     width = WINSIZE_X;
     height = WINSIZE_Y;
@@ -119,19 +119,19 @@ void Game::keyboardFunc(unsigned char key, int, int)
 				break;
 			}
         case 'd':
-            instance->ic->removeItem(instance->ic->getSelected());
+            instance->ic->removeEntity(instance->ic->getSelected());
             break;
         case 'g':
             instance->gravityOn = !instance->gravityOn;
             break;
         case 'p':
-            instance->ic->pop();
+            instance->ic->pop_back();
             break;
         case 'b':
             instance->drawBBoxes = !(instance->drawBBoxes);
             break;
         case 'l':
-            instance->ic->removeItem(instance->ic->length() - 1);
+            instance->ic->removeEntity(instance->ic->length() - 1);
             break;
 		case 's':
 			{
@@ -142,34 +142,34 @@ void Game::keyboardFunc(unsigned char key, int, int)
 				break;
 			}
         case '0':
-            instance->ic->removeItem(0);
+            instance->ic->removeEntity(0);
             break;
         case '1':
-            instance->ic->removeItem(1);
+            instance->ic->removeEntity(1);
             break;
         case '2':
-            instance->ic->removeItem(2);
+            instance->ic->removeEntity(2);
             break;
         case '3':
-            instance->ic->removeItem(3);
+            instance->ic->removeEntity(3);
             break;
         case '4':
-            instance->ic->removeItem(4);
+            instance->ic->removeEntity(4);
             break;
         case '5':
-            instance->ic->removeItem(5);
+            instance->ic->removeEntity(5);
             break;
         case '6':
-            instance->ic->removeItem(6);
+            instance->ic->removeEntity(6);
             break;
         case '7':
-            instance->ic->removeItem(7);
+            instance->ic->removeEntity(7);
             break;
         case '8':
-            instance->ic->removeItem(8);
+            instance->ic->removeEntity(8);
             break;
         case '9':
-            instance->ic->removeItem(9);
+            instance->ic->removeEntity(9);
             break;
         default:
             break;
@@ -209,7 +209,7 @@ void Game::mouse(int button, int state, int x, int y)
             if (state == GLUT_DOWN)
             {
                 instance->ic->select((GLdouble)x, (GLdouble)y);
-				Item* selected = instance->ic->getSelected();
+				Entity* selected = instance->ic->getSelected();
 				if (selected != NULL)
 				{
 					instance->ic->getSelected()->setClickPos((GLdouble)x, (GLdouble)y);
@@ -227,14 +227,13 @@ void Game::mouse(int button, int state, int x, int y)
         case GLUT_RIGHT_BUTTON:
             if (state == GLUT_DOWN)
             {
-                //instance->ic->getSelected()->moveTo(x, y);
-                instance->ic->push(new Circle(instance->ic->getNextItemId(), x, y));
+                instance->ic->push_back(new Circle(instance->ic->getNextEntityId(), x, y));
             }
             break;
         case GLUT_MIDDLE_BUTTON:
             if (state == GLUT_DOWN)
             {
-                instance->ic->push(new Square(instance->ic->getNextItemId(), x, y));
+                instance->ic->push_back(new Square(instance->ic->getNextEntityId(), x, y));
             }
         default:
             break;
@@ -249,7 +248,7 @@ void Game::dragMouse(int x, int y)
 	}
 }
 
-ItemCollection* Game::getItemCollection()
+EntityList* Game::getEntityList()
 {
     return this->ic;
 }

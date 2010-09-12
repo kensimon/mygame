@@ -2,7 +2,7 @@
 #include "Square.h"
 
 Square::Square(int id, int xpos, int ypos, int itemsize)
-: Item(id, SquareType)
+: Entity(id, SquareType)
 {
     x = xpos;
     y = ypos;

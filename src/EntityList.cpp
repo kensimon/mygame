@@ -1,10 +1,10 @@
-#include "ItemCollection.h"
+#include "EntityList.h"
 #include "Square.h"
 #include "Game.h"
 #include <iostream>
 #include <cstring>
 
-ItemCollection::ItemCollection(int framewait)
+EntityList::EntityList(int framewait)
 {
 	selected = NULL;
 	phys_thread = NULL;
@@ -18,25 +18,25 @@ ItemCollection::ItemCollection(int framewait)
 	collision_bufsize = 1;
 }
 
-ItemCollection::~ItemCollection()
+EntityList::~EntityList()
 {
 }
 
-list<Item*>::iterator ItemCollection::end()
+list<Entity*>::iterator EntityList::end()
 {
 	return items.end();
 }
 
-void ItemCollection::startCalculating()
+void EntityList::startCalculating()
 {
 	if (phys_thread == NULL)
 	{
 		phys_stoprequested = false;
-		phys_thread = new thread(boost::bind(&ItemCollection::calculationLoop, this)); //thread will start here.
+		phys_thread = new thread(boost::bind(&EntityList::calculationLoop, this)); //thread will start here.
 	}
 }
 
-void ItemCollection::stopCalculating()
+void EntityList::stopCalculating()
 {
 	if (phys_thread != NULL)
 	{
@@ -50,18 +50,18 @@ void ItemCollection::stopCalculating()
 	}
 }
 
-bool ItemCollection::isCalculationStopped()
+bool EntityList::isCalculationStopped()
 {
 	return (phys_thread == NULL);
 }
 
-void ItemCollection::push(Item* n)
+void EntityList::push_back(Entity* n)
 {
 	mutex::scoped_lock lock(addremove_mutex);
 	scoped_write_lock wlock(readwrite_mutex);
 	items.push_back(n);
 	int size = items.size();
-	int itemId = n->getItemId();
+	int itemId = n->getEntityId();
 
 	if (size * size > collision_bufsize)
 	{
@@ -87,13 +87,13 @@ void ItemCollection::push(Item* n)
 		}
 	}
 	
-	redoItemIds();
+	redoEntityIds();
 }
 
-Item* ItemCollection::get(int num)
+Entity* EntityList::get(int num)
 {
     int i = 0;
-	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 	{
 		if (i++ == num)
 		{
@@ -103,7 +103,7 @@ Item* ItemCollection::get(int num)
     return NULL;
 }
 
-void ItemCollection::removeItem(Item* i)
+void EntityList::removeEntity(Entity* i)
 {
 	if (i == NULL)
 		return;
@@ -118,7 +118,7 @@ void ItemCollection::removeItem(Item* i)
 	i->stop();
 	items.remove(i);
 
-	redoItemIds();
+	redoEntityIds();
 
 	delete i;
 	if (selected == i)
@@ -127,30 +127,30 @@ void ItemCollection::removeItem(Item* i)
 	}
 }
 
-void ItemCollection::redoItemIds()
+void EntityList::redoEntityIds()
 {
 	int j = 0;
-	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 	{
 		//re-do all the item IDs.
-		(*pos)->setItemId(j++);
+		(*pos)->setEntityId(j++);
 	}
 }
 
-void ItemCollection::removeItem(int num)
+void EntityList::removeEntity(int num)
 {
-	removeItem(get(num));
+	removeEntity(get(num));
 }
 
-void ItemCollection::pop()
+void EntityList::pop_back()
 {
-	removeItem(items.size() - 1);
+	removeEntity(items.size() - 1);
 }
 
-void ItemCollection::drawAll()
+void EntityList::drawAll()
 {
     bool dbb = Game::getInstance()->drawBBoxes;
-	for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+	for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 	{
 		if (dbb) {
 			(*pos)->drawBBox();
@@ -159,12 +159,12 @@ void ItemCollection::drawAll()
 	}
 }
 
-boost::shared_mutex* ItemCollection::getReadWriteMutex()
+boost::shared_mutex* EntityList::getReadWriteMutex()
 {
 	return &readwrite_mutex;
 }
 
-void ItemCollection::calculationLoop()
+void EntityList::calculationLoop()
 {
 	while (!phys_stoprequested)
 	{
@@ -176,7 +176,7 @@ void ItemCollection::calculationLoop()
 			memset(collisions, COLL_UNKNOWN, items.size() * sizeof(CollisionType));
 
 			//wake up each thread.  Each one will be waiting for the above write lock to free.
-			for (list<Item*>::iterator pos = items.begin(); pos != items.end(); ++pos)
+			for (list<Entity*>::iterator pos = items.begin(); pos != items.end(); ++pos)
 			{
 				(*pos)->tick();
 			}
@@ -186,12 +186,12 @@ void ItemCollection::calculationLoop()
 	}
 }
 
-void ItemCollection::select(GLdouble x, GLdouble y)
+void EntityList::select(GLdouble x, GLdouble y)
 {
 	if (items.size() == 0)
 		return;
 
-    Item* cur;
+    Entity* cur;
     bool done = false;
 	
 	/* start from the end and work our way back to the beginning to find the 
@@ -199,7 +199,7 @@ void ItemCollection::select(GLdouble x, GLdouble y)
 	 * last, and we want to select the item that the user is seeing, not the one
 	 * that's drawn underneath.
 	 */
-	for (list<Item*>::reverse_iterator pos = items.rbegin(); pos != items.rend() && !done; ++pos)
+	for (list<Entity*>::reverse_iterator pos = items.rbegin(); pos != items.rend() && !done; ++pos)
 	{
 		done = true;
 		cur = *(pos);
@@ -247,38 +247,38 @@ void ItemCollection::select(GLdouble x, GLdouble y)
         selected->setColor( .8, 0, 0);
 }
 
-Item* ItemCollection::getSelected()
+Entity* EntityList::getSelected()
 {
     return selected;
 }
 
-int ItemCollection::length()
+int EntityList::length()
 {
 	return items.size();
 }
 
-CollisionType ItemCollection::getCollision(Item *item_a, Item *item_b)
+CollisionType EntityList::getCollision(Entity& item_a, Entity& item_b)
 {
-	int minid = min(item_a->getItemId(), item_b->getItemId());
-	int maxid = max(item_a->getItemId(), item_b->getItemId());
+	int minid = min(item_a.getEntityId(), item_b.getEntityId());
+	int maxid = max(item_a.getEntityId(), item_b.getEntityId());
 	return collisions[(minid * items.size()) + maxid];
 }
 
-void ItemCollection::setCollision(Item* item_a, Item* item_b, CollisionType c)
+void EntityList::setCollision(Entity& item_a, Entity& item_b, CollisionType c)
 {
-	int minid = min(item_a->getItemId(), item_b->getItemId());
-	int maxid = max(item_a->getItemId(), item_b->getItemId());
+	int minid = min(item_a.getEntityId(), item_b.getEntityId());
+	int maxid = max(item_a.getEntityId(), item_b.getEntityId());
 	collisions[(minid * items.size()) + maxid] = c;
 }
 
-mutex* ItemCollection::getCollisionMutex(Item *item_a, Item *item_b)
+mutex* EntityList::getCollisionMutex(Entity *item_a, Entity *item_b)
 {
-	int minid = min(item_a->getItemId(), item_b->getItemId());
-	int maxid = max(item_a->getItemId(), item_b->getItemId());
+	int minid = min(item_a->getEntityId(), item_b->getEntityId());
+	int maxid = max(item_a->getEntityId(), item_b->getEntityId());
 	return collision_mutexes[(minid * items.size()) + maxid];
 }
 
-int ItemCollection::getNextItemId()
+int EntityList::getNextEntityId()
 {
 	mutex::scoped_lock lock(addremove_mutex);
 	scoped_write_lock wlock(readwrite_mutex);

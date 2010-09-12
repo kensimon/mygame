@@ -1,9 +1,9 @@
 #ifndef __CIRCLE_H
 #define __CIRCLE_H
 
-#include "Item.h"
+#include "Entity.h"
 
-class Circle : public Item
+class Circle : public Entity
 {
     public:
         Circle(int id, int xpos = 250, int ypos = 250, int size = 15);
