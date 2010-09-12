@@ -103,25 +103,25 @@ Entity* EntityList::get(int num)
     return NULL;
 }
 
-void EntityList::removeEntity(Entity* i)
+void EntityList::removeEntity(Entity* e)
 {
-	if (i == NULL)
+	if (e == NULL)
 		return;
 
-	i->pause();
+	e->pause();
 	mutex::scoped_lock lock(addremove_mutex); //make sure no more object threads are waked
 	
 	//wait until all object threads are asleep, then immediately relese the lock. that way,
 	//if the item to be deleted is waiting on a read lock, it will continue and gracefully quit.
 	{ scoped_write_lock wlock(readwrite_mutex); }
 	
-	i->stop();
-	entities.remove(i);
+	e->stop();
+	entities.remove(e);
 
 	redoEntityIds();
 
-	delete i;
-	if (selected == i)
+	delete e;
+	if (selected == e)
 	{
 		selected = NULL;
 	}
@@ -173,7 +173,7 @@ void EntityList::calculationLoop()
 			mutex::scoped_lock lock(addremove_mutex); //Make sure we don't wake threads if objects are being added/removed
 			scoped_write_lock writelock(readwrite_mutex); //wait until all threads are done.
 			
-			memset(collisions, COLL_UNKNOWN, entities.size() * sizeof(CollisionType));
+			memset(collisions, COLL_UNKNOWN, entities.size() * entities.size() * sizeof(CollisionType));
 
 			//wake up each thread.  Each one will be waiting for the above write lock to free.
 			for (list<Entity*>::iterator pos = entities.begin(); pos != entities.end(); ++pos)
@@ -211,9 +211,8 @@ void EntityList::select(GLdouble x, GLdouble y)
                 y >= (cur->gety() - cur->getSize()))
         {
 			if (selected != NULL) //de-color the previously selected item 
-			{
-				selected->resetColor();
-			}
+				selected->isSelected = false;
+
             selected = cur;
         }
         else
@@ -229,7 +228,7 @@ void EntityList::select(GLdouble x, GLdouble y)
     {
         // Select nothing.
 		if (selected != NULL)
-			selected->resetColor();
+			selected->isSelected = false;
         selected = NULL;
     }
 
@@ -244,7 +243,7 @@ void EntityList::select(GLdouble x, GLdouble y)
     }
 
     if (selected != NULL)
-        selected->setColor( .8, 0, 0);
+		selected->isSelected = true;
 }
 
 Entity* EntityList::getSelected()

@@ -30,6 +30,7 @@ bbox(0,0,0,0)
 
     grabbed = false;
 	itemId = id;
+	isSelected = false;
 }
 
 Entity::~Entity()
@@ -200,7 +201,12 @@ void Entity::work()
 	EntityList* entities = Game::getInstance()->getEntityList();
 	while (!thread_stoprequested)
 	{
-		{ mutex::scoped_lock lock(tick_mutex); wait_variable.wait(lock); } //wait for notification to continue.
+		{
+			mutex::scoped_lock lock(tick_mutex);
+			isColliding = false;
+			wait_variable.wait(lock);
+		} //wait for notification to continue.
+
 		if (thread_stoprequested) //the destructor also calls notify_all(), so if we're being destructed, quit now.
 			return;
 
@@ -209,7 +215,6 @@ void Entity::work()
 			return;
 
 		//Collishin Detectshun!
-		bool isColliding = false;
 		for (EntityList::iterator pos(*entities, this); pos != entities->end(); ++pos)
 		{
 			mutex* m = entities->getCollisionMutex(this, *pos);
@@ -221,24 +226,28 @@ void Entity::work()
 					otherbbox->max_y > bbox.min_y &&
 					otherbbox->min_y < bbox.max_y)
 				{
-					Entity* otheritem = *pos;
-					entities->setCollision(*this, *otheritem, COLL_TRUE);
-					if (otheritem->item_type == CircleType && item_type == CircleType)
+					Entity* other = *pos;
+					isColliding = true;
+					other->isColliding = true;
+					entities->setCollision(*this, *other, COLL_TRUE);
+					if (other->item_type == CircleType && item_type == CircleType)
 					{
-						mutex::scoped_lock mlock(otheritem->move_mutex);
-						isColliding = true;
+						//mutex::scoped_lock mlock(other->move_mutex);
+						//do collision calculations here
 					}
 				}
 			}
 		}
+
 		if (isColliding)
 		{
 			this->red = 0;
 		}
 		else
 		{
-			this->red = orig_red;
+			resetColor();
 		}
+
 		mutex::scoped_lock mvlock(move_mutex);
 		degrees += spinMomentum;
 		if (degrees > 360.0)

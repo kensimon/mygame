@@ -17,7 +17,8 @@ enum CollisionType
 {
 	COLL_UNKNOWN,
 	COLL_TRUE,
-	COLL_FALSE
+	COLL_FALSE,
+	COLL_CALCULATING
 };
 
 class collision_iterator;
@@ -35,13 +36,13 @@ public:
 	void setCollision(Entity& item_a, Entity& item_b, CollisionType);
 	CollisionType getCollision(Entity& item_a, Entity& item_b);
 
-	void push_back(Entity* i);
+	void push_back(Entity* e);
 	void pop_back();
     Entity* get(int num);
 	void drawAll();
 	void calculationLoop();
 	void select(GLdouble x, GLdouble y);
-	void removeEntity(Entity* i);
+	void removeEntity(Entity* e);
 	void removeEntity(int num);
     int length();
 	list<Entity*>::iterator end();
@@ -148,6 +149,7 @@ public:
 
 			if (entities.getCollision(*base_item, **entities_iterator) == COLL_UNKNOWN) //if we haven't calculated a collision for these two,
 			{
+				entities.setCollision(*base_item, **entities_iterator, COLL_CALCULATING);
 				return *this; //use this item.
 			}
 			else

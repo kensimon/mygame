@@ -18,6 +18,11 @@ Square::~Square()
 
 void Square::draw()
 {
+	if (isSelected)
+	{
+		setColor(.8,0,0);
+	}
+
     glPushMatrix();
     glLoadIdentity();
 

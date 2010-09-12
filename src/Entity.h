@@ -81,6 +81,8 @@ class Entity
 		void tick();
 		void setEntityId(int id);
 		int getEntityId();
+		bool isColliding;
+		bool isSelected;
 
     protected:
         Entity(int id, EntityType type);
