@@ -1,3 +1,9 @@
+mygame (0.0.6) lucid; urgency=low
+
+  * Fixed collision detection so all items are detected
+
+ -- Ken Simon <ken@ninkendo.org>  Sun, 12 Sep 2010 19:28:07 -0400
+
 mygame (0.0.5) jaunty; urgency=low
 
   * Multithreaded items
