@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\Circle.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Entity.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EntityList.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Game.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Square.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Circle.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Config.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Entity.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EntityList.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Game.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scoped_rw_lock.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Square.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{c2cb2b01-13a6-4eef-90fc-a075c9ff1793}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers">
+      <UniqueIdentifier>{62e0329a-dbca-4e67-b42c-59b37cc9a74b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
