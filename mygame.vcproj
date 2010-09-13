@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="include;&quot;C:\Program Files\boost\boost_1_36_0&quot;"
+				AdditionalIncludeDirectories="include;&quot;C:\Boost\include\boost-1_44&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;FREEGLUT_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,9 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(ProjectDir)\lib\freeglut_static.lib&quot; &quot;$(ProjectDir)\lib\libboost_thread-vc90-mt-gd-1_36.lib&quot; &quot;$(ProjectDir)\lib\libboost_date_time-vc90-mt-gd-1_36.lib&quot;"
+				AdditionalDependencies="&quot;$(ProjectDir)\lib\freeglut_static.lib&quot;"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="C:\Boost\lib"
 				GenerateManifest="true"
 				AddModuleNamesToAssembly=""
 				GenerateDebugInformation="true"
@@ -122,7 +122,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="include;&quot;C:\Program Files\boost\boost_1_36_0&quot;"
+				AdditionalIncludeDirectories="include;&quot;C:\Boost\include\boost-1_44&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;FREEGLUT_STATIC"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -142,9 +142,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
-				AdditionalDependencies="&quot;$(ProjectDir)\lib\freeglut_static.lib&quot; &quot;$(ProjectDir)\lib\libboost_thread-vc90-mt-1_36.lib&quot; &quot;$(ProjectDir)\lib\libboost_date_time-vc90-mt-1_36.lib&quot;"
+				AdditionalDependencies="&quot;$(ProjectDir)\lib\freeglut_static.lib&quot;"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;lib&quot;"
+				AdditionalLibraryDirectories="C:\Boost\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -176,87 +176,6 @@
 				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-1_36.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
-		<Configuration
-			Name="Debug_Boost39|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="include;&quot;C:\Program Files\boost\boost_1_39&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;FREEGLUT_STATIC"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="4"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(ProjectDir)\lib\freeglut_static.lib&quot; &quot;$(ProjectDir)\lib\libboost_thread-vc90-mt-gd-1_39.lib&quot; &quot;$(ProjectDir)\lib\libboost_date_time-vc90-mt-gd-1_39.lib&quot;"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories=""
-				GenerateManifest="true"
-				AddModuleNamesToAssembly=""
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-				AllowIsolation="true"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(ProjectDir)dll\boost_thread-vc90-mt-gd-1_39.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dll\boost_date_time-vc90-mt-gd-1_39.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
-			/>
-		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -271,15 +190,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Entity.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\EntityList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Game.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Item.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ItemCollection.cpp"
 				>
 			</File>
 			<File
@@ -305,15 +224,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Entity.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\EntityList.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Game.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Item.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ItemCollection.h"
 				>
 			</File>
 			<File

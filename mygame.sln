@@ -1,17 +1,14 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mygame", "mygame.vcproj", "{63FB8228-0B4E-455D-B95C-B10DBDDB625C}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mygame", "mygame.vcxproj", "{63FB8228-0B4E-455D-B95C-B10DBDDB625C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug_Boost39|Win32 = Debug_Boost39|Win32
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{63FB8228-0B4E-455D-B95C-B10DBDDB625C}.Debug_Boost39|Win32.ActiveCfg = Debug_Boost39|Win32
-		{63FB8228-0B4E-455D-B95C-B10DBDDB625C}.Debug_Boost39|Win32.Build.0 = Debug_Boost39|Win32
 		{63FB8228-0B4E-455D-B95C-B10DBDDB625C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{63FB8228-0B4E-455D-B95C-B10DBDDB625C}.Debug|Win32.Build.0 = Debug|Win32
 		{63FB8228-0B4E-455D-B95C-B10DBDDB625C}.Release|Win32.ActiveCfg = Release|Win32
