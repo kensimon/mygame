@@ -294,12 +294,12 @@ BOOST_LIBS=""
 
 AC_DEFUN( CHECK_FOR_BOOST_LIB, [
     AC_MSG_CHECKING([for Boost library (with -mt)])
-    LIBS="$LIBS $BOOST_LDOPTS -lboost_thread-mt"
+    LIBS="$LIBS $BOOST_LDOPTS -lboost_thread-mt -lboost_system-mt"
     AC_TRY_LINK( , , have_BOOSTmt=yes, have_BOOSTmt=no)
     AC_MSG_RESULT([$have_BOOSTmt])
 
     if test "x$have_BOOSTmt" = "xyes" ; then
-        BOOST_LIBS="$BOOST_LDOPTS -lboost_thread-mt"
+        BOOST_LIBS="$BOOST_LDOPTS -lboost_thread-mt -lboost_system-mt"
     fi
 
 	dnl in case -mt isn't available
@@ -307,12 +307,12 @@ AC_DEFUN( CHECK_FOR_BOOST_LIB, [
 
 		LIBS="$saved_LIBS"
 		AC_MSG_CHECKING([for Boost library (without -mt)])
-		LIBS="$LIBS $BOOST_LDOPTS -lboost_thread"
+		LIBS="$LIBS $BOOST_LDOPTS -lboost_thread -lboost_system"
 		AC_TRY_LINK( , , have_BOOST=yes, have_BOOST=no)
 		AC_MSG_RESULT([$have_BOOST])
 
 		if test "x$have_BOOST" = "xyes" ; then
-			BOOST_LIBS="$BOOST_LDOPTS -lboost_thread"
+			BOOST_LIBS="$BOOST_LDOPTS -lboost_thread -lboost_system"
 		fi
 	fi
 ])
